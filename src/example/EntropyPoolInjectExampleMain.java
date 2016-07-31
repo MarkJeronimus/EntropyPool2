@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.SwingUtilities;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import com.digitalmodular.entropypool.EntropyPool2;
+import org.digitalmodular.entropypool.EntropyPool2;
 
 /**
  * @author Mark Jeronimus

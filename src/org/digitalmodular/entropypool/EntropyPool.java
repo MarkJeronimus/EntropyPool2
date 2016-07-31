@@ -24,24 +24,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.digitalmodular.utilities;
+package org.digitalmodular.entropypool;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
+import org.digitalmodular.utilities.Verifyer;
 
 /**
  * @author Mark Jeronimus
+ * @version 2.0
+ * @since 2.0
  */
-// Created 2016-07-25
-public enum Verifyer {
-	;
+// Created 2016-07-29
+public interface EntropyPool {
+	String DEFAULT_SECURERANDOM_STRING  = "SP800CTR/AES/256/256/16777216";
+	String DEFAULT_MESSAGEDIGEST_STRING = "Keccak-512";
+	String DEFAULT_CIPHER_STRING        = "Threefish-1024/EAX/NoPadding";
 
-	public static void assertThat(boolean condition, String exceptionMessage) {
-		if (!condition) throw new AssertionError(exceptionMessage);
+	// The numbers that are 'most coprime' to 64 are 19 and 45. (Hexacontatetragram{64/19})
+	// Subtracting 64s until total file size < 64kiB.
+	int DEFAULT_ENTROPY_POOL_BYTE_LENGTH = 65536 - 64 * 6 - 45;
+
+	boolean isAlive();
+	void terminate();
+
+	void injectEntropy(byte[] bytes, int entropyBits);
+	byte[] extractEntropy(int numBytes);
+
+	void mix();
+
+	default void checkAlive() {
+		Verifyer.requireState(isAlive(), "Entropy pool has been terminated");
 	}
 
-	public static void requireThat(boolean condition, String exceptionMessage) {
-		if (!condition) throw new IllegalArgumentException(exceptionMessage);
-	}
+	default void injectEntropyFromFileOrDirectory(File fileOrDirectory) throws IOException {
+		Objects.requireNonNull(fileOrDirectory, "fileOrDirectory = null");
+		Verifyer.requireThat(fileOrDirectory.exists(), "File doesn't exist");
+		checkAlive();
 
-	public static void requireState(boolean condition, String exceptionMessage) {
-		if (!condition) throw new IllegalStateException(exceptionMessage);
+		EntropyPoolInjector.injectEntropyFromFileOrDirectory(this, fileOrDirectory);
 	}
 }

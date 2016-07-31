@@ -24,9 +24,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.digitalmodular.entropypool;
+package org.digitalmodular.entropypool;
 
-import com.digitalmodular.utilities.Version;
+import org.digitalmodular.utilities.Version;
 
 /**
  * @author Mark Jeronimus

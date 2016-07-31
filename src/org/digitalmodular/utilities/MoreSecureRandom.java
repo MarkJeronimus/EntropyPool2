@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.digitalmodular.utilities;
+package org.digitalmodular.utilities;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;

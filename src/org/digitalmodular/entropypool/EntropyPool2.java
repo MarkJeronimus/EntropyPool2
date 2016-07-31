@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.digitalmodular.entropypool;
+package org.digitalmodular.entropypool;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,10 +43,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
-import static com.digitalmodular.entropypool.EntropyPoolUtilities.getLengthAfterWrap;
-import static com.digitalmodular.entropypool.EntropyPoolUtilities.getLengthBeforeWrap;
-import com.digitalmodular.utilities.MoreSecureRandom;
-import com.digitalmodular.utilities.Verifyer;
+import static org.digitalmodular.entropypool.EntropyPoolUtilities.getLengthAfterWrap;
+import static org.digitalmodular.entropypool.EntropyPoolUtilities.getLengthBeforeWrap;
+import org.digitalmodular.utilities.MoreSecureRandom;
+import org.digitalmodular.utilities.Verifyer;
 
 /**
  * @author Mark Jeronimus

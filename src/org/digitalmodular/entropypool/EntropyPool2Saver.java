@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.digitalmodular.entropypool;
+package org.digitalmodular.entropypool;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -35,8 +35,8 @@ import java.io.OutputStream;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static com.digitalmodular.entropypool.EntropyPoolUtilities.*;
-import com.digitalmodular.utilities.Verifyer;
+import static org.digitalmodular.entropypool.EntropyPoolUtilities.*;
+import org.digitalmodular.utilities.Verifyer;
 
 /**
  * @author Mark Jeronimus
