@@ -1,8 +1,11 @@
 syntax: regexp
 
-\.idea/
-\out/
-.*\.iml
-.*\.jar
-.*\.tc
-.*\.zip
+^.idea/
+^bin/
+^out/
+^\.classpath$
+^\.project$
+^.*\.iml
+^.*\.jar
+^.*\.tc
+^.*\.zip
