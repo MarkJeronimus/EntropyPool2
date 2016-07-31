@@ -1,0 +1,8 @@
+syntax: regexp
+
+\.idea/
+\out/
+.*\.iml
+.*\.jar
+.*\.tc
+.*\.zip
