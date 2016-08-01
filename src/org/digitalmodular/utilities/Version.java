@@ -58,10 +58,10 @@ public class Version {
 
 	private final int     major;
 	private final int     minor;
-	private final int     revision;
 	private final Release release;
+	private final int     revision;
 
-	public Version(int major, int minor, int revision, Release release) {
+	public Version(int major, int minor, Release release, int revision) {
 		Objects.requireNonNull(release, "release = null");
 		Verifyer.requireThat(major >= 0, "Major version not in range [0,Integer.MAX_VALUE]: " + major);
 		Verifyer.requireThat(minor >= 0, "Minor version not in range [0,Integer.MAX_VALUE]: " + minor);
@@ -69,17 +69,17 @@ public class Version {
 
 		this.major = major;
 		this.minor = minor;
-		this.revision = revision;
 		this.release = release;
+		this.revision = revision;
 	}
 
 	public int getMinor()       { return minor; }
 
 	public int getMajor()       { return major; }
 
-	public int getRevision()    { return revision; }
-
 	public Release getRelease() { return release; }
+
+	public int getRevision()    { return revision; }
 
 	@Override
 	public boolean equals(Object o) {
@@ -90,8 +90,8 @@ public class Version {
 
 		return (getMinor() == version.getMinor() &&
 		        getMajor() == version.getMajor() &&
-		        getRevision() == version.getRevision() &&
-		        getRelease() == version.getRelease());
+		        getRelease() == version.getRelease() &&
+		        getRevision() == version.getRevision());
 	}
 
 	@Override
@@ -99,16 +99,23 @@ public class Version {
 		int hashCode = startFNV();
 		hashCode = hashFNV(hashCode, getMajor());
 		hashCode = hashFNV(hashCode, getMinor());
-		hashCode = hashFNV(hashCode, getRevision());
 		hashCode = hashFNV(hashCode, getRelease());
+		hashCode = hashFNV(hashCode, getRevision());
 		return hashCode;
 	}
 
 	@Override
 	public String toString() {
 		if (release != Release.STABLE)
-			return String.format("%d.%d (r%d) %s", minor, major, revision, release.getReleaseName());
+			return String.format("%d.%d %s (r%d)", minor, major, release.getReleaseName(), revision);
 		else
 			return String.format("%d.%d (r%d)", minor, major, revision);
+	}
+
+	public String toShortString() {
+		if (release != Release.STABLE)
+			return String.format("%d.%d %s", minor, major, revision, release.getReleaseName());
+		else
+			return String.format("%d.%d", minor, major, revision);
 	}
 }

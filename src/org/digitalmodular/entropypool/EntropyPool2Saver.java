@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,7 +75,9 @@ public enum EntropyPool2Saver {
 	}
 
 	private static void writeHeader(EntropyPool2 pool, DataOutputStream dataOutput) throws IOException {
-		writePaddedString(dataOutput, MAGIC_TAG, "EntropyPool v2.0 Alpha © 2016 DigitalModular");
+		writePaddedString(dataOutput, MAGIC_TAG,
+		                  String.format("EntropyPool v%s © %d DigitalModular",
+		                                CURRENT_VERSION.toShortString(), LocalDate.now().getYear()));
 		writePaddedInts(dataOutput, VERSION_TAG, CURRENT_VERSION.getMajor(), CURRENT_VERSION.getMinor(),
 		                CURRENT_VERSION.getRevision(), CURRENT_VERSION.getRelease().getValue());
 		writePaddedString(dataOutput, SECURERANDOM_TAG, pool.getSecureRandom().getAlgorithm());

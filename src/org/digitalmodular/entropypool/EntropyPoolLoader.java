@@ -87,7 +87,7 @@ public enum EntropyPoolLoader {
 				case VERSION_TAG:
 					int[] version = readPaddedInts(tag, dataInput, 4);
 
-					builder.setVersion(new Version(version[0], version[1], version[2], Version.Release.of(version[3])));
+					builder.setVersion(new Version(version[0], version[1], Version.Release.of(version[2]), version[3]));
 					break;
 				case POOL_TAG:
 					int poolSize = readPaddedInts(tag, dataInput, 1)[0];
