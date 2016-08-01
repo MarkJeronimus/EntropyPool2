@@ -30,7 +30,9 @@ public class Version {
 		STABLE(0x00000000, "Stable"),
 		RC(0xCCCCCCCC, "RC"),
 		BETA(0xBBBBBBBB, "Beta"),
-		ALPHA(0xAAAAAAAA, "Alpha");
+		ALPHA(0xAAAAAAAA, "Alpha"),
+		MILESTONE(0x88888888, "Milestone"),
+		DEVELOPMENT(0x11111111, "Development");
 
 		private final int    value;
 		private final String releaseName;
