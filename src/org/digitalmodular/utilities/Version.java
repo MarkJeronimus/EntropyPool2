@@ -59,7 +59,7 @@ public class Version {
 
 	public Version(int major, int minor, int revision, Release release) {
 		Objects.requireNonNull(release, "release = null");
-		Verifyer.requireThat(major > 0, "Major version not in range [1,Integer.MAX_VALUE]: " + major);
+		Verifyer.requireThat(major >= 0, "Major version not in range [0,Integer.MAX_VALUE]: " + major);
 		Verifyer.requireThat(minor >= 0, "Minor version not in range [0,Integer.MAX_VALUE]: " + minor);
 		Verifyer.requireThat(revision > 0, "Revision not in range [1,Integer.MAX_VALUE]: " + revision);
 
