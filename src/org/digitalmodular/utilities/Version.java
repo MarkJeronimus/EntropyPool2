@@ -54,8 +54,8 @@ public class Version {
 		}
 	}
 
-	private final int     minor;
 	private final int     major;
+	private final int     minor;
 	private final int     revision;
 	private final Release release;
 
@@ -65,8 +65,8 @@ public class Version {
 		Verifyer.requireThat(minor >= 0, "Minor version not in range [0,Integer.MAX_VALUE]: " + minor);
 		Verifyer.requireThat(revision > 0, "Revision not in range [1,Integer.MAX_VALUE]: " + revision);
 
-		this.minor = minor;
 		this.major = major;
+		this.minor = minor;
 		this.revision = revision;
 		this.release = release;
 	}
@@ -94,8 +94,8 @@ public class Version {
 
 	@Override
 	public int hashCode() {
-		int result = getMinor();
-		result = 31 * result + getMajor();
+		int result = getMajor();
+		result = 31 * result + getMinor();
 		result = 31 * result + getRevision();
 		result = 31 * result + (getRelease() == null ? 0 : getRelease().hashCode());
 		return result;
