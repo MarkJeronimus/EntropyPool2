@@ -20,6 +20,8 @@
 package org.digitalmodular.utilities;
 
 import java.util.Objects;
+import static org.digitalmodular.utilities.FNV.hashFNV;
+import static org.digitalmodular.utilities.FNV.startFNV;
 
 /**
  * @author Mark Jeronimus
@@ -94,11 +96,12 @@ public class Version {
 
 	@Override
 	public int hashCode() {
-		int result = getMajor();
-		result = 31 * result + getMinor();
-		result = 31 * result + getRevision();
-		result = 31 * result + (getRelease() == null ? 0 : getRelease().hashCode());
-		return result;
+		int hashCode = startFNV();
+		hashCode = hashFNV(hashCode, getMajor());
+		hashCode = hashFNV(hashCode, getMinor());
+		hashCode = hashFNV(hashCode, getRevision());
+		hashCode = hashFNV(hashCode, getRelease());
+		return hashCode;
 	}
 
 	@Override
