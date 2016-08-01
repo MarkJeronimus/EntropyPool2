@@ -174,7 +174,7 @@ public class EntropyPool2 implements EntropyPool {
 		Verifyer.requireThat(poolFile.exists(), "poolFile.exists() = false: " + poolFile);
 		Verifyer.requireThat(poolFile.canRead(), "poolFile.canRead() = false: " + poolFile);
 
-		EntropyPool pool = EntropyPoolLoader.loadPoolFromFile(poolFile);
+		EntropyPool pool = EntropyPoolLoader.loadFromFile(poolFile);
 
 		if (!(pool instanceof EntropyPool2))
 			throw new IllegalArgumentException("File is not version 2.0. You can use" +
@@ -189,7 +189,7 @@ public class EntropyPool2 implements EntropyPool {
 		Objects.requireNonNull(tempFile, "tempFile = null");
 		checkAlive();
 
-		EntropyPool2Saver.savePoolToFile(this, tempFile);
+		EntropyPool2Saver.saveToFile(this, tempFile);
 
 		if (poolFile.exists())
 			Files.move(poolFile.toPath(), bakFile.toPath(), StandardCopyOption.ATOMIC_MOVE);

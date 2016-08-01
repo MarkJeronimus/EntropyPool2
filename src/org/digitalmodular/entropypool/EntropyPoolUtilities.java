@@ -30,7 +30,7 @@ import org.digitalmodular.utilities.Version;
 public enum EntropyPoolUtilities {
 	;
 
-	public static final Version CURRENT_VERSION = new Version(2, 0, 1, Version.Release.ALPHA);
+	public static final Version CURRENT_VERSION = new Version(2, 1, 9, Version.Release.ALPHA);
 
 	public static final int    TAG_LENGTH        = 16;
 	public static final String MAGIC_TAG         = "ENTROPYPOOL";

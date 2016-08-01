@@ -40,7 +40,7 @@ import org.digitalmodular.utilities.Verifyer;
 public enum EntropyPool2Saver {
 	;
 
-	public static void savePoolToFile(EntropyPool2 pool, File file) throws IOException {
+	public static void saveToFile(EntropyPool2 pool, File file) throws IOException {
 		Objects.requireNonNull(pool, "pool = null");
 		Objects.requireNonNull(file);
 		pool.checkAlive();
@@ -48,11 +48,11 @@ public enum EntropyPool2Saver {
 		Verifyer.requireThat(!file.exists() || file.canWrite(), "file.canWrite() = false: " + file);
 
 		try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
-			savePoolToOutputStream(pool, outputStream);
+			saveToOutputStream(pool, outputStream);
 		}
 	}
 
-	public static void savePoolToOutputStream(EntropyPool2 pool, OutputStream outputStream) throws IOException {
+	public static void saveToOutputStream(EntropyPool2 pool, OutputStream outputStream) throws IOException {
 		Objects.requireNonNull(pool, "pool = null");
 		Objects.requireNonNull(outputStream);
 		pool.checkAlive();

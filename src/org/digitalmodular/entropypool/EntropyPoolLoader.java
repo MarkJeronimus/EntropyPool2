@@ -45,19 +45,19 @@ import org.digitalmodular.utilities.Version;
 public enum EntropyPoolLoader {
 	;
 
-	public static EntropyPool loadPoolFromFile(File file) throws IOException {
+	public static EntropyPool loadFromFile(File file) throws IOException {
 		Objects.requireNonNull(file);
 		Verifyer.requireThat(file.exists(), "file.exists() = false");
 		Verifyer.requireThat(file.isFile(), "file.isFile() = false: " + file);
 		Verifyer.requireThat(file.canRead(), "file.canRead() = false: " + file);
 
 		try (InputStream reader = new BufferedInputStream(new FileInputStream(file))) {
-			return loadPoolFromInputStream(reader);
+			return loadFromInputStream(reader);
 		}
 	}
 
 	@SuppressWarnings("UnusedAssignment")
-	public static EntropyPool loadPoolFromInputStream(InputStream inputStream) throws IOException {
+	public static EntropyPool loadFromInputStream(InputStream inputStream) throws IOException {
 		Objects.requireNonNull(inputStream);
 		Verifyer.requireThat(inputStream.available() > 0, "inputStream.available() <= 0: " + inputStream.available());
 		Verifyer.requireThat(inputStream.available() < Integer.MAX_VALUE - 1,
