@@ -73,7 +73,7 @@ public class EntropyPool2 implements EntropyPool {
 
 	private int writePointer;
 
-	public EntropyPool2(int newSize) throws NoSuchPaddingException, NoSuchAlgorithmException {
+	public EntropyPool2(int newSize) throws NoSuchAlgorithmException, NoSuchPaddingException {
 		Verifyer.requireThat(newSize > 0, "newSize <= 0: " + newSize);
 
 		buffer = new byte[newSize];

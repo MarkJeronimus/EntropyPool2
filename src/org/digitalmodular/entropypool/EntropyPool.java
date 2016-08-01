@@ -33,7 +33,7 @@ import org.digitalmodular.utilities.Verifyer;
 public interface EntropyPool {
 	String DEFAULT_SECURERANDOM_STRING  = "SP800CTR/AES/256/256/16777216";
 	String DEFAULT_MESSAGEDIGEST_STRING = "Keccak-512";
-	String DEFAULT_CIPHER_STRING        = "Threefish-1024/EAX/NoPadding";
+	String DEFAULT_CIPHER_STRING        = "Threefish-1024/EAX/PKCS5Padding";
 
 	// The numbers that are 'most coprime' to 64 are 19 and 45. (Hexacontatetragram{64/19})
 	// Subtracting 64s until total file size < 64kiB.

@@ -35,8 +35,6 @@ import javax.swing.JFileChooser;
 
 /**
  * @author Mark Jeronimus
- * @version 2.0
- * @since 2.0
  */
 // Created 2016-07-25
 public class ShowFileChooserAction extends AbstractAction {
