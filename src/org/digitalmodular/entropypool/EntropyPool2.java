@@ -120,22 +120,22 @@ public class EntropyPool2 implements EntropyPool {
 		                     "secureRandomBitsUsed < 0: " +
 		                     secureRandomBitsUsed);
 		Verifyer.requireThat(hashX >= 0,
-		                     "hash < 0: " +
+		                     "hashX < 0: " +
 		                     hashX);
 		Verifyer.requireThat(hashX < buffer.length,
-		                     "hash >= buffer.length: " +
+		                     "hashX >= buffer.length: " +
 		                     hashX + " >= " + buffer.length);
 		Verifyer.requireThat(hashY >= 0,
-		                     "hash < 0: " +
+		                     "hashY < 0: " +
 		                     hashY);
 		Verifyer.requireThat(hashY < buffer.length,
-		                     "hash >= buffer.length: " +
+		                     "hashY >= buffer.length: " +
 		                     hashY + " >= " + buffer.length);
 		Verifyer.requireThat(mixCount >= 0,
 		                     "mixCount < 0: " +
 		                     mixCount);
 		Verifyer.requireThat(entropyInjectedCount >= 0,
-		                     "entropyAddedCount < 0: " +
+		                     "entropyInjectedCount < 0: " +
 		                     entropyInjectedCount);
 		Verifyer.requireThat(entropyExtractedCount >= 0,
 		                     "entropyExtractedCount < 0: " +
