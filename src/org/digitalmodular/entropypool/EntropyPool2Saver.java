@@ -89,7 +89,7 @@ public enum EntropyPool2Saver {
 		writePaddedInts(dataOutput, COUNT_TAG, pool.getMixCount(), pool.getEntropyInjectedCount(),
 		                pool.getEntropyExtractedCount());
 		writePaddedLongs(dataOutput, DATE_TAG, pool.getCreatedDate(), pool.getLastMixDate(),
-		                 pool.getLastEntropyInjectedDate(), pool.getLastEntropyExtractedDate());
+		                 pool.getLastInjectedDate(), pool.getLastExtractedDate());
 		writePaddedInts(dataOutput, POOL_TAG, pool.getBuffer().length);
 	}
 

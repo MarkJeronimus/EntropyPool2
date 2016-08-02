@@ -68,8 +68,8 @@ public class EntropyPool2 implements EntropyPool {
 
 	private long createdDate;
 	private long lastMixDate;
-	private long lastEntropyInjectedDate;
-	private long lastEntropyExtractedDate;
+	private long lastInjectedDate;
+	private long lastExtractedDate;
 
 	private int writePointer;
 
@@ -92,8 +92,8 @@ public class EntropyPool2 implements EntropyPool {
 		entropyExtractedCount = 0;
 		createdDate = System.currentTimeMillis();
 		lastMixDate = 0;
-		lastEntropyInjectedDate = 0;
-		lastEntropyExtractedDate = 0;
+		lastInjectedDate = 0;
+		lastExtractedDate = 0;
 	}
 
 	public EntropyPool2(byte[] buffer,
@@ -101,49 +101,57 @@ public class EntropyPool2 implements EntropyPool {
 	                    long entropyRemaining, long entropyInjected, long secureRandomBitsUsed,
 	                    int hashX, int hashY,
 	                    int mixCount, int entropyInjectedCount, int entropyExtractedCount,
-	                    long createdDate, long lastMixDate, long lastEntropyInjectedDate,
-	                    long lastEntropyExtractedDate) {
+	                    long createdDate, long lastMixDate, long lastInjectedDate,
+	                    long lastExtractedDate) {
 		Objects.requireNonNull(buffer, "buffer = null");
 		Objects.requireNonNull(secureRandom, "secureRandom = null");
 		Objects.requireNonNull(messageDigest, "messageDigest = null");
 		Objects.requireNonNull(cipher, "cipher = null");
 		Verifyer.requireThat(entropyRemaining >= 0,
-		                     "entropyCurrent < 0: " + entropyRemaining);
+		                     "entropyRemaining < 0: " +
+		                     entropyRemaining);
 		Verifyer.requireThat(entropyRemaining <= buffer.length * 8,
-		                     "entropyCurrent > buffer.length * 8: " + entropyRemaining + " > " + buffer.length * 8);
+		                     "entropyRemaining > buffer.length * 8: " +
+		                     entropyRemaining + " > " + buffer.length * 8);
 		Verifyer.requireThat(entropyInjected >= 0,
-		                     "entropyInjected < 0: " + entropyInjected);
+		                     "entropyInjected < 0: " +
+		                     entropyInjected);
 		Verifyer.requireThat(secureRandomBitsUsed >= 0,
-		                     "secureRandomBitsUsed < 0: " + secureRandomBitsUsed);
+		                     "secureRandomBitsUsed < 0: " +
+		                     secureRandomBitsUsed);
 		Verifyer.requireThat(hashX >= 0,
-		                     "hash < 0: " + hashX);
+		                     "hash < 0: " +
+		                     hashX);
 		Verifyer.requireThat(hashX < buffer.length,
-		                     "hash >= buffer.length: " + hashX + " >= " + buffer.length);
+		                     "hash >= buffer.length: " +
+		                     hashX + " >= " + buffer.length);
 		Verifyer.requireThat(hashY >= 0,
-		                     "hash < 0: " + hashY);
+		                     "hash < 0: " +
+		                     hashY);
 		Verifyer.requireThat(hashY < buffer.length,
-		                     "hash >= buffer.length: " + hashY + " >= " + buffer.length);
+		                     "hash >= buffer.length: " +
+		                     hashY + " >= " + buffer.length);
 		Verifyer.requireThat(mixCount >= 0,
-		                     "mixCount < 0: " + mixCount);
+		                     "mixCount < 0: " +
+		                     mixCount);
 		Verifyer.requireThat(entropyInjectedCount >= 0,
-		                     "entropyAddedCount < 0: " + entropyInjectedCount);
+		                     "entropyAddedCount < 0: " +
+		                     entropyInjectedCount);
 		Verifyer.requireThat(entropyExtractedCount >= 0,
-		                     "entropyExtractedCount < 0: " + entropyExtractedCount);
+		                     "entropyExtractedCount < 0: " +
+		                     entropyExtractedCount);
 		Verifyer.requireThat(createdDate >= 0,
 		                     "createdDate < 0: " +
 		                     Instant.ofEpochMilli(createdDate));
 		Verifyer.requireThat(lastMixDate == 0 || lastMixDate >= createdDate,
 		                     "lastMixDate != 0 and < createdDate: " +
-		                     Instant.ofEpochMilli(lastMixDate) + " < " +
-		                     Instant.ofEpochMilli(createdDate));
-		Verifyer.requireThat(lastEntropyInjectedDate == 0 || lastEntropyInjectedDate >= createdDate,
-		                     "lastEntropyAddedDate != 0 and < createdDate: " +
-		                     Instant.ofEpochMilli(lastEntropyInjectedDate) + " < " +
-		                     Instant.ofEpochMilli(createdDate));
-		Verifyer.requireThat(lastEntropyExtractedDate == 0 || lastEntropyExtractedDate >= createdDate,
-		                     "lastEntropyExtractedDate != 0 and < createdDate: " +
-		                     Instant.ofEpochMilli(lastEntropyExtractedDate) + " < " +
-		                     Instant.ofEpochMilli(createdDate));
+		                     Instant.ofEpochMilli(lastMixDate) + " < " + Instant.ofEpochMilli(createdDate));
+		Verifyer.requireThat(lastInjectedDate == 0 || lastInjectedDate >= createdDate,
+		                     "lastInjectedDate != 0 and < createdDate: " +
+		                     Instant.ofEpochMilli(lastInjectedDate) + " < " + Instant.ofEpochMilli(createdDate));
+		Verifyer.requireThat(lastExtractedDate == 0 || lastExtractedDate >= createdDate,
+		                     "lastExtractedDate != 0 and < createdDate: " +
+		                     Instant.ofEpochMilli(lastExtractedDate) + " < " + Instant.ofEpochMilli(createdDate));
 
 		this.buffer = buffer;
 		this.secureRandom = secureRandom;
@@ -161,8 +169,8 @@ public class EntropyPool2 implements EntropyPool {
 		this.writePointer = 0;
 		this.createdDate = createdDate;
 		this.lastMixDate = lastMixDate;
-		this.lastEntropyInjectedDate = lastEntropyInjectedDate;
-		this.lastEntropyExtractedDate = lastEntropyExtractedDate;
+		this.lastInjectedDate = lastInjectedDate;
+		this.lastExtractedDate = lastExtractedDate;
 	}
 
 	public static EntropyPool2 newInstance() throws NoSuchAlgorithmException, NoSuchPaddingException {
@@ -302,14 +310,14 @@ public class EntropyPool2 implements EntropyPool {
 		return lastMixDate;
 	}
 
-	public long getLastEntropyInjectedDate() {
+	public long getLastInjectedDate() {
 		checkAlive();
-		return lastEntropyInjectedDate;
+		return lastInjectedDate;
 	}
 
-	public long getLastEntropyExtractedDate() {
+	public long getLastExtractedDate() {
 		checkAlive();
-		return lastEntropyExtractedDate;
+		return lastExtractedDate;
 	}
 
 	@Override
@@ -332,7 +340,7 @@ public class EntropyPool2 implements EntropyPool {
 		entropyRemaining = Math.min(buffer.length * 8, entropyRemaining + entropyBits);
 		entropyInjected += entropyBits;
 		entropyInjectedCount++;
-		lastEntropyInjectedDate = System.currentTimeMillis();
+		lastInjectedDate = System.currentTimeMillis();
 	}
 
 	@Override
@@ -351,7 +359,7 @@ public class EntropyPool2 implements EntropyPool {
 
 		entropyRemaining -= numBytes * 8;
 		entropyExtractedCount++;
-		lastEntropyExtractedDate = System.currentTimeMillis();
+		lastExtractedDate = System.currentTimeMillis();
 		Verifyer.assertThat(entropyRemaining >= 0, "entropyCurrent < 0");
 
 		return bytes;
@@ -432,8 +440,8 @@ public class EntropyPool2 implements EntropyPool {
 			hashInt(writePointer);
 			hashLong(createdDate);
 			hashLong(lastMixDate);
-			hashLong(lastEntropyInjectedDate);
-			hashLong(lastEntropyExtractedDate);
+			hashLong(lastInjectedDate);
+			hashLong(lastExtractedDate);
 			hashLong(time);
 			hashBlockFromBuffer(hashX, digestSize);
 			hashBlockFromBuffer(hashY, digestSize);
