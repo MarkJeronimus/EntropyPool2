@@ -54,8 +54,7 @@ public enum EntropyPool2Saver {
 		                     "file.canWrite() == false: " +
 		                     file);
 
-		LOGGER.info("Saving Entropy Pool file " + file);
-		LogTimer.start();
+		LogTimer.start(LOGGER, "Saving Entropy Pool file " + file);
 
 		try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)))) {
 			writeHeader(out, pool);
@@ -73,19 +72,19 @@ public enum EntropyPool2Saver {
 	}
 
 	private static void writePool(DataOutputStream out, EntropyPool2 pool) throws IOException {
-		out.writeUTF(pool.getSecureRandom().getAlgorithm());
-		out.writeUTF(pool.getMessageDigest().getAlgorithm());
-		out.writeUTF(pool.getCipher().getAlgorithm());
+		out.writeUTF(pool.secureRandom().getAlgorithm());
+		out.writeUTF(pool.messageDigest().getAlgorithm());
+		out.writeUTF(pool.cipher().getAlgorithm());
 
-		out.writeLong(pool.getCreatedDate());
-		writeLoggingCount(out, pool.getMixCount());
-		writeLoggingLong(out, pool.getInjectedEntropyLoggingLong());
-		writeLoggingLong(out, pool.getExtractedEntropyLoggingLong());
+		out.writeLong(pool.createdDate());
+		writeLoggingCount(out, pool.mixCount());
+		writeLoggingLong(out, pool.injectedEntropy());
+		writeLoggingLong(out, pool.extractedEntropy());
 
-		out.writeInt(pool.getHashX());
-		out.writeInt(pool.getHashY());
+		out.writeInt(pool.hashX());
+		out.writeInt(pool.hashY());
 
-		out.writeInt(pool.getBuffer().length);
-		out.write(pool.getBuffer());
+		out.writeInt(pool.buffer().length);
+		out.write(pool.buffer());
 	}
 }

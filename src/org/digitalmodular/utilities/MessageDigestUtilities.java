@@ -73,7 +73,7 @@ public enum MessageDigestUtilities {
 		digest.update(buffer, 0, lengthAfterWrap);
 	}
 
-	public static void getDigestToBuffer(MessageDigest digest, byte[] buffer, int byteOffset,	                                     byte[] digestBuffer) {
+	public static void getDigestToBuffer(MessageDigest digest, byte[] buffer, int byteOffset, byte[] digestBuffer) {
 		int digestSize = digest.getDigestLength();
 
 		try {

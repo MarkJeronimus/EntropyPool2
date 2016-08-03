@@ -257,27 +257,27 @@ public class EntropyPool2 implements EntropyPool {
 		LogTimer.finishAndLog(LOGGER, "Mixed the Entropy Pool in {0} seconds");
 	}
 
-	SecureRandom getSecureRandom()               { return secureRandom; }
+	SecureRandom secureRandom()    { return secureRandom; }
 
-	MessageDigest getMessageDigest()             { return messageDigest; }
+	MessageDigest messageDigest()  { return messageDigest; }
 
-	Cipher getCipher()                           { return cipher; }
+	Cipher cipher()                { return cipher; }
 
-	byte[] getBuffer()                           { return buffer; }
+	byte[] buffer()                { return buffer; }
 
-	long getCreatedDate()                        { return createdDate; }
+	long createdDate()             { return createdDate; }
 
-	LoggingCount getMixCount()                   { return mixCount; }
+	LoggingCount mixCount()        { return mixCount; }
 
-	LoggingLong getInjectedEntropyLoggingLong()  { return injectedEntropy; }
+	LoggingLong injectedEntropy()  { return injectedEntropy; }
 
-	LoggingLong getExtractedEntropyLoggingLong() { return extractedEntropy; }
+	LoggingLong extractedEntropy() { return extractedEntropy; }
 
-	int getHashX()                               { return hashX; }
+	int hashX()                    { return hashX; }
 
-	void setHashX(int hashX)                     { this.hashX = hashX; }
+	void hashX(int hashX)          { this.hashX = hashX; }
 
-	int getHashY()                               { return hashY; }
+	int hashY()                    { return hashY; }
 
-	void setHashY(int hashY)                     { this.hashY = hashY; }
+	void hashY(int hashY)          { this.hashY = hashY; }
 }
