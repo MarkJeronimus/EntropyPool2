@@ -45,7 +45,10 @@ public class ShowFileChooserAction extends AbstractAction {
 	public ShowFileChooserAction(Consumer<File[]> callback) {
 		super("Select files and/or directories");
 
-		this.callback = Objects.requireNonNull(callback);
+		Objects.requireNonNull(callback,
+		                       "callback == null");
+
+		this.callback = callback;
 
 		chooser = new JFileChooser();
 		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);

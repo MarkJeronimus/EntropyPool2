@@ -49,6 +49,8 @@ public class EntropyPoolInjectExampleMain {
 	private static final File ENTROPY_POOL_FILE_BAK  = new File("r:\\entropypool.bak");
 	private static final File ENTROPY_POOL_FILE_TEMP = new File("r:\\entropypool.tmp");
 
+	private static final Logger LOGGER = Logger.getLogger(EntropyPoolInjectExampleMain.class.getName());
+
 	static {
 		Security.addProvider(new BouncyCastleProvider());
 	}
@@ -73,7 +75,7 @@ public class EntropyPoolInjectExampleMain {
 
 			pool.saveToFile(ENTROPY_POOL_FILE, ENTROPY_POOL_FILE_BAK, ENTROPY_POOL_FILE_TEMP);
 		} catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
-			Logger.getLogger(EntropyPoolInjectExampleMain.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		}
 	}
 
@@ -84,8 +86,8 @@ public class EntropyPoolInjectExampleMain {
 				try {
 					pool.injectEntropyFromFileOrDirectory(fileOrDirectory);
 				} catch (IOException ex) {
-					Logger.getLogger(EntropyPoolInjectExampleMain.class.getName())
-					      .log(Level.SEVERE, ex.getMessage(), ex);
+					LOGGER
+							.log(Level.SEVERE, ex.getMessage(), ex);
 				}
 			}
 		}

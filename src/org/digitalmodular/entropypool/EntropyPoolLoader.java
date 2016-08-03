@@ -20,21 +20,18 @@
 package org.digitalmodular.entropypool;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.digitalmodular.entropypool.EntropyPoolUtilities.*;
-import org.digitalmodular.utilities.Verifyer;
-import org.digitalmodular.utilities.Version;
+import static org.digitalmodular.entropypool.EntropyPool.MAGIC;
+import static org.digitalmodular.utilities.container.DataIO.readVersion;
+import org.digitalmodular.utilities.LogTimer;
+import org.digitalmodular.utilities.Verifier;
+import org.digitalmodular.utilities.container.Version;
 
 /**
  * @author Mark Jeronimus
@@ -45,182 +42,69 @@ import org.digitalmodular.utilities.Version;
 public enum EntropyPoolLoader {
 	;
 
+	private static final Logger LOGGER = Logger.getLogger(EntropyPoolLoader.class.getName());
+
 	public static EntropyPool loadFromFile(File file) throws IOException {
-		Objects.requireNonNull(file);
-		Verifyer.requireThat(file.exists(), "file.exists() = false");
-		Verifyer.requireThat(file.isFile(), "file.isFile() = false: " + file);
-		Verifyer.requireThat(file.canRead(), "file.canRead() = false: " + file);
+		Objects.requireNonNull(file,
+		                       "file == null");
+		Verifier.requireThat(file.exists(),
+		                     "file.exists() == false");
+		Verifier.requireThat(file.isFile(),
+		                     "file.isFile() == false: " +
+		                     file);
+		Verifier.requireThat(file.canRead(),
+		                     "file.canRead() == false: " +
+		                     file);
 
-		try (InputStream reader = new BufferedInputStream(new FileInputStream(file))) {
-			return loadFromInputStream(reader);
-		}
-	}
+		LogTimer.start(LOGGER, "Loading Entropy Pool file " + file);
 
-	@SuppressWarnings("UnusedAssignment")
-	public static EntropyPool loadFromInputStream(InputStream inputStream) throws IOException {
-		Objects.requireNonNull(inputStream);
-		Verifyer.requireThat(inputStream.available() > 0, "inputStream.available() <= 0: " + inputStream.available());
-		Verifyer.requireThat(inputStream.available() < Integer.MAX_VALUE - 1,
-		                     "inputStream.available() >= Integer.MAX_VALUE - 1: " + inputStream.available());
+		EntropyPool pool;
+		try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+			Version version = readHeader(in);
 
-		long t = System.nanoTime();
+			if (version == null)
+				throw new IOException("File is not an EntropyPool file: " + file);
 
-		DataInput dataInput = inputStream instanceof DataInput
-		                      ? (DataInput) inputStream
-		                      : new DataInputStream(inputStream);
+			pool = readPool(in, version);
 
-		EntropyPoolBuilder builder = new EntropyPoolBuilder();
-
-		while (true) {
-			if (inputStream.available() < 4) break;
-			String tag = readTag(dataInput);
-
-			switch (tag) {
-				case MAGIC_TAG:
-					String magic = readPaddedString(tag, dataInput);
-
-					builder.setMagic(magic);
-					break;
-				case COMMENT_TAG:
-					String info = readPaddedString(tag, dataInput);
-					break;
-				case VERSION_TAG:
-					int[] version = readPaddedInts(tag, dataInput, 4);
-
-					builder.setVersion(new Version(version[0], version[1], Version.Release.of(version[2]), version[3]));
-					break;
-				case POOL_TAG:
-					int poolSize = readPaddedInts(tag, dataInput, 1)[0];
-
-					builder.setPool(poolSize);
-
-					dataInput.readFully(builder.getPoolBuffer());
-					break;
-				case SECURERANDOM_TAG:
-					String secureRandom = readPaddedString(tag, dataInput);
-
-					builder.setSecureRandom(secureRandom);
-					break;
-				case MESSAGEDIGEST_TAG:
-					String digest = readPaddedString(tag, dataInput);
-
-					builder.setMessageDigest(digest);
-					break;
-				case CIPHER_TAG:
-					String cipher = readPaddedString(tag, dataInput);
-
-					builder.setCipher(cipher);
-					break;
-				case ENTROPY_TAG:
-					long[] entropy = readPaddedLongs(tag, dataInput, 3);
-
-					builder.setEntropy(entropy);
-					break;
-				case HASH_TAG:
-					int[] hash = readPaddedInts(tag, dataInput, 2);
-
-					builder.setHash(hash);
-					break;
-				case COUNT_TAG:
-					int[] count = readPaddedInts(tag, dataInput, 3);
-
-					builder.setCount(count);
-					break;
-				case DATE_TAG:
-					long[] date = readPaddedLongs(tag, dataInput, 4);
-
-					builder.setDate(date);
-					break;
-				default:
-					Logger.getLogger(EntropyPoolLoader.class.getName()).warning("Unknown tag encountered: " + tag);
-			}
-
-			if (builder.isComplete()) break;
+			if (in.available() > 0)
+				LOGGER.warning(in.available() + " extraneous byte(s) detected");
 		}
 
-		if (inputStream.available() > 0)
-			Logger.getLogger(EntropyPoolLoader.class.getName())
-			      .warning(inputStream.available() + " extraneous byte(s) detected");
-
-		EntropyPool2 pool = builder.buildEntropyPool();
-
-		t = System.nanoTime() - t;
-
-		Logger.getLogger(EntropyPoolLoader.class.getName())
-		      .log(Level.INFO, "Loaded the entropy pool in {0} seconds", t / 1e9);
-
+		LogTimer.finishAndLog(LOGGER, "Loaded the Entropy Pool in {0} seconds");
 		return pool;
 	}
 
-	private static String readTag(DataInput dataInput) throws IOException {
-		byte[] tagBytes = new byte[TAG_LENGTH];
+	private static Version readHeader(DataInput in) throws IOException {
+		byte[] magic = new byte[MAGIC.length()];
+		in.readFully(magic);
 
-		dataInput.readFully(tagBytes);
+		LOGGER.info(new String(magic, "UTF-8"));
 
-		String tag = new String(tagBytes, Charset.forName("UTF-8"));
-		tag = tag.trim();
-		return tag;
+		for (int i = 0; i < magic.length; i++)
+			if (magic[i] != (byte) MAGIC.charAt(i))
+				return null;
+
+		String title = in.readUTF();
+		LOGGER.info("title: " + title);
+
+		Version version = readVersion(in);
+		LOGGER.info("version: " + version);
+		return version;
 	}
 
-	private static String readPaddedString(String tag, DataInput dataInput) throws IOException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream(32);
+	private static EntropyPool readPool(DataInputStream in, Version version) throws IOException {
+		EntropyPool pool;
 
-		while (true) {
-			byte ch = dataInput.readByte();
-			if (ch == '\0') break;
-
-			out.write(ch);
+		if (version.getMajor() == 2) {
+			pool = EntropyPool2Loader.readPool(in);
+		} else {
+			if (version.getMajor() < 2)
+				throw new IOException("Versions below 2 not supported: " + version);
+			else
+				throw new IOException("Versions above 2 not supported: " + version);
 		}
 
-		unpad(dataInput, TAG_LENGTH + out.size() + 1, 0x10);
-
-		String string = out.toString("UTF-8");
-
-		Logger.getLogger(EntropyPoolLoader.class.getName()).info(tag + " tag: " + string);
-
-		return string;
-	}
-
-	private static int[] readPaddedInts(String tag, DataInput dataInput, int numInts) throws IOException {
-		int[] ints = new int[numInts];
-
-		for (int i = 0; i < numInts; i++) ints[i] = dataInput.readInt();
-
-		unpad(dataInput, TAG_LENGTH + numInts * 4, 0x10);
-
-		Logger.getLogger(EntropyPoolLoader.class.getName()).info(tag + " tag: " + Arrays.toString(ints));
-
-		return ints;
-	}
-
-	private static long[] readPaddedLongs(String tag, DataInput dataInput, int numLongs) throws IOException {
-		long[] longs = new long[numLongs];
-
-		for (int i = 0; i < numLongs; i++) longs[i] = dataInput.readLong();
-
-		unpad(dataInput, TAG_LENGTH + numLongs * 8, 0x10);
-
-		Logger.getLogger(EntropyPoolLoader.class.getName()).info(tag + " tag: " + Arrays.toString(longs));
-
-		return longs;
-	}
-
-	private static String readString(DataInput dataInput) throws IOException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream(32);
-
-		while (true) {
-			byte ch = dataInput.readByte();
-			if (ch == '\0') break;
-
-			out.write(ch);
-		}
-
-		return out.toString("UTF-8");
-	}
-
-	private static void unpad(DataInput dataInput, int readLength, int padModulo) throws IOException {
-		int padLength = calculatePadLength(readLength, padModulo);
-
-		dataInput.skipBytes(padLength);
+		return pool;
 	}
 }

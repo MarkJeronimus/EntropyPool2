@@ -17,11 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.digitalmodular.utilities;
+package org.digitalmodular.utilities.container;
 
 import java.util.Objects;
 import static org.digitalmodular.utilities.FNV.hashFNV;
 import static org.digitalmodular.utilities.FNV.startFNV;
+import org.digitalmodular.utilities.Verifier;
 
 /**
  * @author Mark Jeronimus
@@ -62,10 +63,17 @@ public class Version {
 	private final int     revision;
 
 	public Version(int major, int minor, Release release, int revision) {
-		Objects.requireNonNull(release, "release = null");
-		Verifyer.requireThat(major >= 0, "Major version not in range [0,Integer.MAX_VALUE]: " + major);
-		Verifyer.requireThat(minor >= 0, "Minor version not in range [0,Integer.MAX_VALUE]: " + minor);
-		Verifyer.requireThat(revision > 0, "Revision not in range [1,Integer.MAX_VALUE]: " + revision);
+		Verifier.requireThat(major >= 0,
+		                     "major not in range [0,Integer.MAX_VALUE]: " +
+		                     major);
+		Verifier.requireThat(minor >= 0,
+		                     "minor not in range [0,Integer.MAX_VALUE]: " +
+		                     minor);
+		Objects.requireNonNull(release,
+		                       "release == null");
+		Verifier.requireThat(revision > 0,
+		                     "revision not in range [1,Integer.MAX_VALUE]: " +
+		                     revision);
 
 		this.major = major;
 		this.minor = minor;
@@ -114,8 +122,8 @@ public class Version {
 
 	public String toShortString() {
 		if (release != Release.STABLE)
-			return String.format("%d.%d %s", minor, major, revision, release.getReleaseName());
+			return String.format("%d.%d %s", minor, major, release.getReleaseName());
 		else
-			return String.format("%d.%d", minor, major, revision);
+			return String.format("%d.%d", minor, major);
 	}
 }

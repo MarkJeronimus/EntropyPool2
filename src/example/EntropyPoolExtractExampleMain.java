@@ -47,6 +47,8 @@ public class EntropyPoolExtractExampleMain {
 	private static final File ENTROPY_POOL_FILE_BAK  = new File("r:\\entropypool.bak");
 	private static final File ENTROPY_POOL_FILE_TEMP = new File("r:\\entropypool.tmp");
 
+	private static final Logger LOGGER = Logger.getLogger(EntropyPoolExtractExampleMain.class.getName());
+
 	static {
 		Security.addProvider(new BouncyCastleProvider());
 	}
@@ -63,11 +65,11 @@ public class EntropyPoolExtractExampleMain {
 
 			byte[] entropy = pool.extractEntropy(16);
 			System.out.println("Extracted entropy: " + Arrays.toString(entropy));
-			System.out.println("Entropy remaining: " + pool.getEntropyRemaining());
+			System.out.println("Available entropy: " + pool.getAvailableEntropy());
 
 			pool.saveToFile(ENTROPY_POOL_FILE, ENTROPY_POOL_FILE_BAK, ENTROPY_POOL_FILE_TEMP);
 		} catch (IOException ex) {
-			Logger.getLogger(EntropyPoolExtractExampleMain.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		}
 	}
 }

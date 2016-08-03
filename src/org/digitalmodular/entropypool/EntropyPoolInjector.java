@@ -25,9 +25,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.digitalmodular.utilities.Verifyer;
+import org.digitalmodular.utilities.LogTimer;
+import org.digitalmodular.utilities.Verifier;
 
 /**
  * @author Mark Jeronimus
@@ -38,12 +38,18 @@ import org.digitalmodular.utilities.Verifyer;
 public enum EntropyPoolInjector {
 	;
 
-	private static final int MAX_READ_ARRAY_LENGTH = 16 * 1024 * 1024;
+	private static final int MAX_READ_ARRAY_LENGTH = 1024 * 1024;
+
+	private static final Logger LOGGER = Logger.getLogger(EntropyPoolInjector.class.getName());
 
 	public static void injectEntropyFromFileOrDirectory(EntropyPool pool, File fileOrDirectory) throws IOException {
-		Objects.requireNonNull(fileOrDirectory);
-		Objects.requireNonNull(pool, "pool = null");
-		Verifyer.requireThat(fileOrDirectory.exists(), "fileOrDirectory.exists() = false: " + fileOrDirectory);
+		Objects.requireNonNull(pool,
+		                       "pool == null");
+		Objects.requireNonNull(fileOrDirectory,
+		                       "fileOrDirectory == null");
+		Verifier.requireThat(fileOrDirectory.exists(),
+		                     "fileOrDirectory.exists() == false: " +
+		                     fileOrDirectory);
 
 		if (fileOrDirectory.isDirectory())
 			injectDirectory(pool, fileOrDirectory);
@@ -54,38 +60,39 @@ public enum EntropyPoolInjector {
 	}
 
 	public static void injectDirectory(EntropyPool pool, File directory) throws IOException {
-		Objects.requireNonNull(directory, "directory = null");
-		Objects.requireNonNull(pool, "pool = null");
-		Verifyer.requireThat(directory.exists(), "directory.exists() = false: " + directory);
+		Objects.requireNonNull(pool,
+		                       "pool == null");
+		Objects.requireNonNull(directory,
+		                       "directory == null");
+		Verifier.requireThat(directory.exists(),
+		                     "directory.exists() == false: " +
+		                     directory);
 
-		for (File file : directory.listFiles()) {
+		for (File file : directory.listFiles())
 			injectEntropyFromFileOrDirectory(pool, file);
-
-			pool.mix();
-		}
 	}
 
 	public static void injectFile(EntropyPool pool, File file) throws IOException {
-		Objects.requireNonNull(file, "file = null");
-		Objects.requireNonNull(pool, "pool = null");
-		Verifyer.requireThat(file.exists(), "file.exists() = false: " + file);
-		Verifyer.requireThat(file.canRead(), "file.canRead() = false: " + file);
+		Objects.requireNonNull(pool,
+		                       "pool == null");
+		Objects.requireNonNull(file,
+		                       "file == null");
+		Verifier.requireThat(file.exists(),
+		                     "file.exists() == false: " +
+		                     file);
+		Verifier.requireThat(file.canRead(),
+		                     "file.canRead() == false: " +
+		                     file);
+
+		LogTimer.start(LOGGER, "Injecting entropy into the Entropy Pool from file " + file);
 
 		long remaining = file.length();
-
-		if (remaining > MAX_READ_ARRAY_LENGTH) {
-			long numChunks = (remaining + MAX_READ_ARRAY_LENGTH - 1) / MAX_READ_ARRAY_LENGTH;
-			Logger.getLogger(EntropyPoolInjector.class.getName())
-			      .log(Level.WARNING,
-			           "File is larger than max array length: {0} > {1}. The file will be read in {1}" +
-			           " pieces and each piece added to the pool as if it were a separate file.",
-			           new Object[]{remaining, MAX_READ_ARRAY_LENGTH, numChunks});
-		}
 
 		byte[] bytesForPool = null;
 
 		try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
 			while (remaining > 0) {
+
 				int size = remaining > MAX_READ_ARRAY_LENGTH ? MAX_READ_ARRAY_LENGTH : (int) remaining;
 
 				if (bytesForPool == null || bytesForPool.length != size) bytesForPool = new byte[size];
@@ -99,5 +106,7 @@ public enum EntropyPoolInjector {
 		}
 
 		pool.mix();
+
+		LogTimer.finishAndLog(LOGGER, "Injected file into the Entropy Pool in {0} seconds");
 	}
 }

@@ -17,24 +17,45 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.digitalmodular.utilities;
+package org.digitalmodular.utilities.container;
+
+import org.digitalmodular.utilities.Verifier;
 
 /**
  * @author Mark Jeronimus
  */
-// Created 2016-07-25
-public enum Verifyer {
-	;
+// Created 2016-08-02
+public class LoggingCount {
+	private int count;
 
-	public static void assertThat(boolean condition, String exceptionMessage) {
-		if (!condition) throw new AssertionError(exceptionMessage);
+	private long modifyDate;
+
+	public LoggingCount(int count, long modifyDate) {
+		Verifier.requireThat(count >= 0,
+		                     "count < 0: " +
+		                     count);
+
+		this.count = count;
+		this.modifyDate = modifyDate;
 	}
 
-	public static void requireThat(boolean condition, String exceptionMessage) {
-		if (!condition) throw new IllegalArgumentException(exceptionMessage);
+	public LoggingCount() {
+		this(0, 0);
 	}
 
-	public static void requireState(boolean condition, String exceptionMessage) {
-		if (!condition) throw new IllegalStateException(exceptionMessage);
+	public void increment() {
+		count++;
+
+		log();
 	}
+
+	private void log() {
+		modifyDate = System.currentTimeMillis();
+	}
+
+	public int getCount()       { return count; }
+
+	public long getModifyDate() { return modifyDate; }
+
+	public String toString()    { return Integer.toString(count); }
 }

@@ -22,15 +22,15 @@ package org.digitalmodular.entropypool;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
-import static org.digitalmodular.entropypool.EntropyPool.*;
-import static org.digitalmodular.entropypool.EntropyPoolUtilities.*;
-import org.digitalmodular.utilities.MoreSecureRandom;
-import org.digitalmodular.utilities.Version;
+import static org.digitalmodular.entropypool.EntropyPool2.*;
+import org.digitalmodular.utilities.SecureRandomFactory;
+import org.digitalmodular.utilities.container.LoggingCount;
+import org.digitalmodular.utilities.container.LoggingLong;
+import org.digitalmodular.utilities.container.Version;
 
 /**
  * @author Mark Jeronimus
@@ -39,49 +39,35 @@ import org.digitalmodular.utilities.Version;
  */
 // Created 2016-07-27
 public class EntropyPoolBuilder {
-	private String  magic   = null;
+	private static final Logger LOGGER = Logger.getLogger(EntropyPoolBuilder.class.getName());
+
 	private Version version = null;
 
-	private Integer poolSize   = null;
-	private byte[]  poolBuffer = null;
+	private SecureRandom  secureRandom  = null;
+	private MessageDigest messageDigest = null;
+	private Cipher        cipher        = null;
 
-	private String        secureRandom       = null;
-	private SecureRandom  builtSecureRandom  = null;
-	private String        messageDigest      = null;
-	private MessageDigest builtMessageDigest = null;
-	private String        cipher             = null;
-	private Cipher        builtCipher        = null;
+	private Long createdDate = null;
 
-	private long[] entropy = null;
-	private int[]  hash    = null;
-	private int[]  count   = null;
-	private long[] date    = null;
+	private LoggingCount mixCount         = null;
+	private LoggingLong  injectedEntropy  = null;
+	private LoggingLong  extractedEntropy = null;
 
-	public void setMagic(String magic) {
-		checkRepeatedTag(MAGIC_TAG, this.magic, magic);
+	private Integer hashX = null;
+	private Integer hashY = null;
 
-		this.magic = magic;
-	}
+	private byte[] buffer = null;
 
-	public void setVersion(Version version) {
-		checkRepeatedTag(VERSION_TAG, this.version, version);
-
-		this.version = version;
-	}
+	public void setVersion(Version version) { this.version = version; }
 
 	public void setSecureRandom(String secureRandom) {
-		checkRepeatedTag(SECURERANDOM_TAG, this.secureRandom, secureRandom);
-
-		this.secureRandom = secureRandom;
-
 		try {
-			builtSecureRandom = MoreSecureRandom.getInstance(secureRandom);
+			this.secureRandom = SecureRandomFactory.getInstance(secureRandom);
 		} catch (NoSuchAlgorithmException ex) {
-			Logger.getLogger(EntropyPoolBuilder.class.getName())
-			      .log(Level.WARNING, SECURERANDOM_TAG + " value cannot be instantiated. Using default: " +
-			                          DEFAULT_SECURERANDOM_STRING, ex);
+			LOGGER.log(Level.WARNING, "SecureRandom cannot be instantiated:" + secureRandom +
+			                          ". Using default: " + DEFAULT_SECURERANDOM_STRING, ex);
 			try {
-				builtSecureRandom = MoreSecureRandom.getInstance(DEFAULT_SECURERANDOM_STRING);
+				this.secureRandom = SecureRandomFactory.getInstance(DEFAULT_SECURERANDOM_STRING);
 			} catch (NoSuchAlgorithmException ex2) {
 				throw new LinkageError(null, ex2);
 			}
@@ -89,18 +75,13 @@ public class EntropyPoolBuilder {
 	}
 
 	public void setMessageDigest(String messageDigest) {
-		checkRepeatedTag(MESSAGEDIGEST_TAG, this.messageDigest, messageDigest);
-
-		this.messageDigest = messageDigest;
-
 		try {
-			builtMessageDigest = MessageDigest.getInstance(messageDigest);
+			this.messageDigest = MessageDigest.getInstance(messageDigest);
 		} catch (NoSuchAlgorithmException ex) {
-			Logger.getLogger(EntropyPoolBuilder.class.getName())
-			      .log(Level.WARNING, MESSAGEDIGEST_TAG + " value cannot be instantiated. Using default: " +
-			                          DEFAULT_MESSAGEDIGEST_STRING, ex);
+			LOGGER.log(Level.WARNING, "MessageDigest cannot be instantiated: " + messageDigest +
+			                          ". Using default: " + DEFAULT_MESSAGEDIGEST_STRING, ex);
 			try {
-				builtMessageDigest = MessageDigest.getInstance(DEFAULT_MESSAGEDIGEST_STRING);
+				this.messageDigest = MessageDigest.getInstance(DEFAULT_MESSAGEDIGEST_STRING);
 			} catch (NoSuchAlgorithmException ex2) {
 				throw new LinkageError(null, ex2);
 			}
@@ -108,109 +89,51 @@ public class EntropyPoolBuilder {
 	}
 
 	public void setCipher(String cipher) {
-		checkRepeatedTag(CIPHER_TAG, this.cipher, cipher);
-
-		this.cipher = cipher;
-
 		try {
-			builtCipher = Cipher.getInstance(cipher);
+			this.cipher = Cipher.getInstance(cipher);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException ex) {
-			Logger.getLogger(EntropyPoolBuilder.class.getName())
-			      .log(Level.WARNING, CIPHER_TAG + " value cannot be instantiated. Using default: " +
-			                          DEFAULT_CIPHER_STRING, ex);
+			LOGGER.log(Level.WARNING, "Cipher cannot be instantiated: " + cipher +
+			                          ". Using default: " + DEFAULT_CIPHER_STRING, ex);
 			try {
-				builtCipher = Cipher.getInstance(DEFAULT_CIPHER_STRING);
+				this.cipher = Cipher.getInstance(DEFAULT_CIPHER_STRING);
 			} catch (NoSuchAlgorithmException | NoSuchPaddingException ex2) {
 				throw new LinkageError(null, ex2);
 			}
 		}
 	}
 
-	public void setPool(int poolSize) {
-		checkRepeatedTag(POOL_TAG, this.poolSize, poolSize);
+	public void setCreatedDate(long createdDate)                  { this.createdDate = createdDate; }
 
-		this.poolSize = poolSize;
+	public void setMixCount(LoggingCount mixCount)                { this.mixCount = mixCount; }
 
-		this.poolBuffer = new byte[poolSize];
+	public void setInjectedEntropy(LoggingLong injectedEntropy)   { this.injectedEntropy = injectedEntropy; }
+
+	public void setExtractedEntropy(LoggingLong extractedEntropy) { this.extractedEntropy = extractedEntropy; }
+
+	public void setHashXY(int hashX, int hashY) {
+		this.hashX = hashX;
+		this.hashY = hashY;
 	}
 
-	public byte[] getPoolBuffer() {
-		return poolBuffer;
-	}
-
-	public void setEntropy(long[] entropy) {
-		checkRepeatedTag(ENTROPY_TAG, this.entropy, entropy);
-
-		this.entropy = entropy;
-	}
-
-	public void setHash(int[] hash) {
-		checkRepeatedTag(HASH_TAG, this.hash, hash);
-
-		this.hash = hash;
-	}
-
-	public void setCount(int[] count) {
-		checkRepeatedTag(COUNT_TAG, this.count, count);
-
-		this.count = count;
-	}
-
-	public void setDate(long[] date) {
-		checkRepeatedTag(DATE_TAG, this.date, date);
-
-		this.date = date;
-	}
-
-	public boolean isComplete() {
-		if (version == null) return false;
-
-		if (poolBuffer == null) return false;
-
-		if (version.getMajor() == 2) {
-			if (secureRandom == null) return false;
-			if (messageDigest == null) return false;
-			if (cipher == null) return false;
-			if (entropy == null) return false;
-			if (hash == null) return false;
-			if (count == null) return false;
-			if (date == null) return false;
-		}
-
-		return true;
-	}
+	public void setBuffer(byte[] buffer) { this.buffer = buffer; }
 
 	public EntropyPool2 buildEntropyPool() {
 		checkForErrors();
 
-		EntropyPool2 pool = new EntropyPool2(poolBuffer,
-		                                     builtSecureRandom, builtMessageDigest, builtCipher,
-		                                     entropy[0], entropy[1], entropy[2],
-		                                     hash[0], hash[1],
-		                                     count[0], count[1], count[2],
-		                                     date[0], date[1], date[2], date[3]);
+		EntropyPool2 pool = new EntropyPool2(secureRandom, messageDigest, cipher,
+		                                     buffer, createdDate, mixCount,
+		                                     injectedEntropy, extractedEntropy,
+		                                     hashX, hashY);
 		return pool;
 	}
 
-	private void checkRepeatedTag(String tag, Object oldValue, Object newValue) {
-		if (oldValue == null) return;
-
-		if (!Objects.deepEquals(oldValue, newValue)) {
-			throw new IllegalArgumentException(
-					tag + " tag repeated, value is different: " + oldValue + " <> " + newValue);
-		}
-
-		Logger.getLogger(EntropyPoolBuilder.class.getName()).warning(tag + " tag repeated");
-	}
-
 	private void checkForErrors() {
-		if (poolBuffer == null) {
-			throw new IllegalStateException(POOL_TAG + " tag not set");
-		}
+		if (buffer == null)
+			throw new IllegalStateException("buffer == null");
 
 		if (version == null) {
-			Logger.getLogger(EntropyPoolBuilder.class.getName())
-			      .warning(VERSION_TAG + " tag not set");
+			LOGGER
+					.warning("version == null");
 
 			return;
 		}
@@ -219,70 +142,82 @@ public class EntropyPoolBuilder {
 
 		if (majorVersion < 2) {
 			throw new IllegalStateException(
-					"Unsupported older version of pool file: " + version);
+					"version.major < 2: " + version);
 		} else if (majorVersion == 2) {
 			checkPresenceSecureRandom();
 			checkPresenceMessageDigest();
 			checkPresenceCipher();
-			checkPresenceEntropy();
-			checkPresenceHash();
-			checkPresenceCount();
-			checkPresenceDate();
+			checkPresenceCreatedDate();
+			checkPresenceMixCount();
+			checkPresenceInjectedEntropy();
+			checkPresenceExtractedEntropy();
+			checkPresenceHashXY();
 		} else if (majorVersion > 2) {
 			throw new IllegalStateException(
-					"Unsupported newer version of pool file: " + version);
+					"version.major > 2: " + version);
 		}
 	}
 
 	private void checkPresenceSecureRandom() {
 		if (secureRandom != null) return;
 
-		Logger.getLogger(EntropyPoolBuilder.class.getName()).warning(
-				SECURERANDOM_TAG + " tag not set. Using default: " + DEFAULT_SECURERANDOM_STRING);
+		LOGGER.warning(
+				"secureRandom == null. Using default: " + DEFAULT_SECURERANDOM_STRING);
 		setSecureRandom(DEFAULT_SECURERANDOM_STRING);
 	}
 
 	private void checkPresenceMessageDigest() {
 		if (messageDigest != null) return;
 
-		Logger.getLogger(EntropyPoolBuilder.class.getName()).warning(
-				MESSAGEDIGEST_TAG + " tag not set. Using default: " + DEFAULT_MESSAGEDIGEST_STRING);
+		LOGGER.warning(
+				"messageDigest == null. Using default: " + DEFAULT_MESSAGEDIGEST_STRING);
 		setMessageDigest(DEFAULT_MESSAGEDIGEST_STRING);
 	}
 
 	private void checkPresenceCipher() {
 		if (cipher != null) return;
 
-		Logger.getLogger(EntropyPoolBuilder.class.getName()).warning(
-				CIPHER_TAG + " tag not set. Using default: " + DEFAULT_CIPHER_STRING);
+		LOGGER.warning(
+				"cipher == null. Using default: " + DEFAULT_CIPHER_STRING);
 		setCipher(DEFAULT_CIPHER_STRING);
 	}
 
-	private void checkPresenceEntropy() {
-		if (entropy != null) return;
+	private void checkPresenceCreatedDate() {
+		if (createdDate != null) return;
 
-		Logger.getLogger(EntropyPoolBuilder.class.getName()).warning(ENTROPY_TAG + " tag not set.");
-		entropy = new long[]{0, 0, 0};
+		LOGGER.warning("createdDate == null. Setting to 0.");
+		createdDate = 0L;
 	}
 
-	private void checkPresenceHash() {
-		if (hash != null) return;
+	private void checkPresenceMixCount() {
+		if (mixCount != null) return;
 
-		Logger.getLogger(EntropyPoolBuilder.class.getName()).warning(HASH_TAG + " tag not set.");
-		hash = new int[]{0, 0};
+		LOGGER.warning("mixCount == null. Making a new instance.");
+		mixCount = new LoggingCount();
 	}
 
-	private void checkPresenceCount() {
-		if (count != null) return;
+	private void checkPresenceInjectedEntropy() {
+		if (injectedEntropy != null) return;
 
-		Logger.getLogger(EntropyPoolBuilder.class.getName()).warning(COUNT_TAG + " tag not set.");
-		count = new int[]{0, 0, 0, 0};
+		LOGGER.warning("injectedEntropy == null. Making a new instance.");
+		injectedEntropy = new LoggingLong(0);
 	}
 
-	private void checkPresenceDate() {
-		if (date != null) return;
+	private void checkPresenceExtractedEntropy() {
+		if (extractedEntropy != null) return;
 
-		Logger.getLogger(EntropyPoolBuilder.class.getName()).warning(DATE_TAG + " tag not set.");
-		date = new long[]{System.currentTimeMillis(), 0, 0, 0};
+		LOGGER.warning("extractedEntropy == null. Making a new instance.");
+		extractedEntropy = new LoggingLong(0);
+	}
+
+	private void checkPresenceHashXY() {
+		if (hashX == null) {
+			LOGGER.warning("hashX == null. Setting to 0.");
+			hashX = 0;
+		}
+		if (hashY == null) {
+			LOGGER.warning("hashY == null. Setting to 0.");
+			hashY = 0;
+		}
 	}
 }

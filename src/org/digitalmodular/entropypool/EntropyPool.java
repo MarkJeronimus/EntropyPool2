@@ -21,8 +21,10 @@ package org.digitalmodular.entropypool;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Objects;
-import org.digitalmodular.utilities.Verifyer;
+import org.digitalmodular.utilities.Verifier;
+import org.digitalmodular.utilities.container.Version;
 
 /**
  * @author Mark Jeronimus
@@ -31,31 +33,30 @@ import org.digitalmodular.utilities.Verifyer;
  */
 // Created 2016-07-29
 public interface EntropyPool {
-	String DEFAULT_SECURERANDOM_STRING  = "SP800CTR/AES/256/256/16777216";
-	String DEFAULT_MESSAGEDIGEST_STRING = "Keccak-512";
-	String DEFAULT_CIPHER_STRING        = "Threefish-1024/EAX/PKCS5Padding";
+	Version CURRENT_VERSION = new Version(2, 0, Version.Release.ALPHA, 14);
 
-	// The numbers that are 'most coprime' to 64 are 19 and 45. (Hexacontatetragram{64/19})
-	// Subtracting 64s until total file size < 64kiB.
-	int DEFAULT_ENTROPY_POOL_BYTE_LENGTH = 65536 - 64 * 6 - 45;
+	String PROGRAM_TITLE = String.format("EntropyPool v%s © %d DigitalModular",
+	                                     CURRENT_VERSION.toShortString(), LocalDate.now().getYear());
 
-	boolean isAlive();
-	void terminate();
+	String MAGIC = "ENTROPYPOOL";
 
 	void injectEntropy(byte[] bytes, int entropyBits);
 	byte[] extractEntropy(int numBytes);
 
+	long getInjectedEntropy();
+	long getExtractedEntropy();
+
 	void mix();
 
-	default void checkAlive() {
-		Verifyer.requireState(isAlive(), "Entropy pool has been terminated");
-	}
-
 	default void injectEntropyFromFileOrDirectory(File fileOrDirectory) throws IOException {
-		Objects.requireNonNull(fileOrDirectory, "fileOrDirectory = null");
-		Verifyer.requireThat(fileOrDirectory.exists(), "File doesn't exist");
-		checkAlive();
+		Objects.requireNonNull(fileOrDirectory,
+		                       "fileOrDirectory == null");
+		Verifier.requireThat(fileOrDirectory.exists(), "File doesn't exist");
 
 		EntropyPoolInjector.injectEntropyFromFileOrDirectory(this, fileOrDirectory);
+	}
+
+	default long getAvailableEntropy() {
+		return getInjectedEntropy() - getExtractedEntropy();
 	}
 }

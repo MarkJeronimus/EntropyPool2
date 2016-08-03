@@ -24,13 +24,12 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.time.LocalDate;
 import java.util.Objects;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.digitalmodular.entropypool.EntropyPoolUtilities.*;
-import org.digitalmodular.utilities.Verifyer;
+import static org.digitalmodular.entropypool.EntropyPool.*;
+import static org.digitalmodular.utilities.container.DataIO.*;
+import org.digitalmodular.utilities.LogTimer;
+import org.digitalmodular.utilities.Verifier;
 
 /**
  * @author Mark Jeronimus
@@ -41,99 +40,52 @@ import org.digitalmodular.utilities.Verifyer;
 public enum EntropyPool2Saver {
 	;
 
+	private static final Logger LOGGER = Logger.getLogger(EntropyPool2Saver.class.getName());
+
 	public static void saveToFile(EntropyPool2 pool, File file) throws IOException {
-		Objects.requireNonNull(pool, "pool = null");
-		Objects.requireNonNull(file);
-		pool.checkAlive();
-		Verifyer.requireThat(!file.exists() || file.isFile(), "file.isFile() = false: " + file);
-		Verifyer.requireThat(!file.exists() || file.canWrite(), "file.canWrite() = false: " + file);
+		Objects.requireNonNull(pool,
+		                       "pool == null");
+		Objects.requireNonNull(file,
+		                       "file == null");
+		Verifier.requireThat(!file.exists() || file.isFile(),
+		                     "file.isFile() == false: " +
+		                     file);
+		Verifier.requireThat(!file.exists() || file.canWrite(),
+		                     "file.canWrite() == false: " +
+		                     file);
 
-		try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
-			saveToOutputStream(pool, outputStream);
-		}
-	}
+		LOGGER.info("Saving Entropy Pool file " + file);
+		LogTimer.start();
 
-	public static void saveToOutputStream(EntropyPool2 pool, OutputStream outputStream) throws IOException {
-		Objects.requireNonNull(pool, "pool = null");
-		Objects.requireNonNull(outputStream);
-		pool.checkAlive();
-
-		long t = System.nanoTime();
-
-		DataOutputStream dataOutput = outputStream instanceof DataOutputStream
-		                              ? (DataOutputStream) outputStream
-		                              : new DataOutputStream(outputStream);
-
-		writeHeader(pool, dataOutput);
-
-		dataOutput.write(pool.getBuffer());
-
-		t = System.nanoTime() - t;
-
-		Logger.getLogger(EntropyPool2Saver.class.getName())
-		      .log(Level.INFO, "Saved the entropy pool in {0} seconds", t / 1e9);
-	}
-
-	private static void writeHeader(EntropyPool2 pool, DataOutputStream dataOutput) throws IOException {
-		writePaddedString(dataOutput, MAGIC_TAG,
-		                  String.format("EntropyPool v%s © %d DigitalModular",
-		                                CURRENT_VERSION.toShortString(), LocalDate.now().getYear()));
-		writePaddedInts(dataOutput, VERSION_TAG, CURRENT_VERSION.getMajor(), CURRENT_VERSION.getMinor(),
-		                CURRENT_VERSION.getRevision(), CURRENT_VERSION.getRelease().getValue());
-		writePaddedString(dataOutput, SECURERANDOM_TAG, pool.getSecureRandom().getAlgorithm());
-		writePaddedString(dataOutput, MESSAGEDIGEST_TAG, pool.getMessageDigest().getAlgorithm());
-		writePaddedString(dataOutput, CIPHER_TAG, pool.getCipher().getAlgorithm());
-		writePaddedLongs(dataOutput, ENTROPY_TAG, pool.getEntropyRemaining(), pool.getEntropyInjected(),
-		                 pool.getSecureRandomBitsUsed());
-		writePaddedInts(dataOutput, HASH_TAG, pool.getHashX(), pool.getHashY());
-		writePaddedInts(dataOutput, COUNT_TAG, pool.getMixCount(), pool.getEntropyInjectedCount(),
-		                pool.getEntropyExtractedCount());
-		writePaddedLongs(dataOutput, DATE_TAG, pool.getCreatedDate(), pool.getLastMixDate(),
-		                 pool.getLastInjectedDate(), pool.getLastExtractedDate());
-		writePaddedInts(dataOutput, POOL_TAG, pool.getBuffer().length);
-	}
-
-	private static void writePaddedString(DataOutputStream dataOutput, String tag, String string)
-			throws IOException {
-		writeTag(dataOutput, tag);
-
-		if (string != null) {
-			dataOutput.write(string.getBytes());
-			dataOutput.writeByte(0);
+		try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)))) {
+			writeHeader(out, pool);
+			writePool(out, pool);
 		}
 
-		pad(dataOutput, 0x10, (byte) 0);
+		LogTimer.finishAndLog(LOGGER, "Saved the Entropy Pool in {0} seconds");
 	}
 
-	private static void writePaddedInts(DataOutputStream dataOutput, String tag, int... ints)
-			throws IOException {
-		writeTag(dataOutput, tag);
+	private static void writeHeader(DataOutputStream out, EntropyPool2 pool) throws IOException {
+		out.writeBytes(MAGIC);
+		out.writeUTF(PROGRAM_TITLE);
 
-		for (int i : ints)
-			dataOutput.writeInt(i);
-
-		pad(dataOutput, 0x10, (byte) 0);
+		writeVersion(out, CURRENT_VERSION);
 	}
 
-	private static void writePaddedLongs(DataOutputStream dataOutput, String tag, long... ints)
-			throws IOException {
-		writeTag(dataOutput, tag);
+	private static void writePool(DataOutputStream out, EntropyPool2 pool) throws IOException {
+		out.writeUTF(pool.getSecureRandom().getAlgorithm());
+		out.writeUTF(pool.getMessageDigest().getAlgorithm());
+		out.writeUTF(pool.getCipher().getAlgorithm());
 
-		for (long i : ints)
-			dataOutput.writeLong(i);
+		out.writeLong(pool.getCreatedDate());
+		writeLoggingCount(out, pool.getMixCount());
+		writeLoggingLong(out, pool.getInjectedEntropyLoggingLong());
+		writeLoggingLong(out, pool.getExtractedEntropyLoggingLong());
 
-		pad(dataOutput, 0x10, (byte) 0);
-	}
+		out.writeInt(pool.getHashX());
+		out.writeInt(pool.getHashY());
 
-	private static void writeTag(DataOutputStream dataOutput, String tag) throws IOException {
-		dataOutput.write(tag.getBytes());
-		pad(dataOutput, TAG_LENGTH, (byte) ' ');
-	}
-
-	private static void pad(DataOutputStream dataOutput, int padModulo, byte byteToWadWith) throws IOException {
-		int writeSize = dataOutput.size();
-		int padLength = calculatePadLength(writeSize, padModulo);
-
-		for (int i = 0; i < padLength; i++) dataOutput.writeByte(byteToWadWith);
+		out.writeInt(pool.getBuffer().length);
+		out.write(pool.getBuffer());
 	}
 }
