@@ -30,22 +30,22 @@ import org.digitalmodular.utilities.Verifier;
 // Created 2016-07-30
 public class Version {
 	public enum Release {
-		STABLE(0x00000000, "Stable"),
-		RC(0xCCCCCCCC, "RC"),
-		BETA(0xBBBBBBBB, "Beta"),
-		ALPHA(0xAAAAAAAA, "Alpha"),
-		MILESTONE(0x88888888, "Milestone"),
-		DEVELOPMENT(0x11111111, "Development");
+		STABLE(0x00, "Stable"),
+		RC(0xCC, "RC"),
+		BETA(0xBB, "Beta"),
+		ALPHA(0xAA, "Alpha"),
+		MILESTONE(0x88, "Milestone"),
+		DEVELOPMENT(0x11, "Development");
 
-		private final int    value;
+		private final byte   value;
 		private final String releaseName;
 
 		Release(int value, String releaseName) {
-			this.value = value;
+			this.value = (byte) value;
 			this.releaseName = releaseName;
 		}
 
-		public int getValue()          { return value; }
+		public byte getValue()         { return value; }
 
 		public String getReleaseName() { return releaseName; }
 
@@ -57,37 +57,37 @@ public class Version {
 		}
 	}
 
-	private final int     major;
-	private final int     minor;
+	private final byte    major;
+	private final byte    minor;
 	private final Release release;
 	private final int     revision;
 
 	public Version(int major, int minor, Release release, int revision) {
-		Verifier.requireThat(major >= 0,
-		                     "major not in range [0,Integer.MAX_VALUE]: " +
+		Verifier.requireThat(major >= 0 && major <= Byte.MAX_VALUE,
+		                     "major not in range [0,Byte.MAX_VALUE]: " +
 		                     major);
-		Verifier.requireThat(minor >= 0,
-		                     "minor not in range [0,Integer.MAX_VALUE]: " +
+		Verifier.requireThat(minor >= 0 && minor <= Byte.MAX_VALUE,
+		                     "minor not in range [0,Byte.MAX_VALUE]: " +
 		                     minor);
 		Objects.requireNonNull(release,
 		                       "release == null");
-		Verifier.requireThat(revision > 0,
+		Verifier.requireThat(revision >= 1,
 		                     "revision not in range [1,Integer.MAX_VALUE]: " +
 		                     revision);
 
-		this.major = major;
-		this.minor = minor;
+		this.major = (byte) major;
+		this.minor = (byte) minor;
 		this.release = release;
-		this.revision = revision;
+		this.revision = (short) revision;
 	}
 
-	public int getMinor()       { return minor; }
+	public byte getMinor()      { return minor; }
 
-	public int getMajor()       { return major; }
+	public byte getMajor()      { return major; }
 
 	public Release getRelease() { return release; }
 
-	public int getRevision()    { return revision; }
+	public int getRevision()  { return revision; }
 
 	@Override
 	public boolean equals(Object o) {
