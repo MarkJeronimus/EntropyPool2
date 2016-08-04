@@ -115,15 +115,15 @@ public class Version {
 	@Override
 	public String toString() {
 		if (release != Release.STABLE)
-			return String.format("%d.%d %s (r%d)", minor, major, release.getReleaseName(), revision);
+			return String.format("%d.%d %s (r%d)", major, minor, release.getReleaseName(), revision);
 		else
-			return String.format("%d.%d (r%d)", minor, major, revision);
+			return String.format("%d.%d (r%d)", major, minor, revision);
 	}
 
 	public String toShortString() {
 		if (release != Release.STABLE)
-			return String.format("%d.%d %s", minor, major, release.getReleaseName());
+			return String.format("%d.%d %s", major, minor, release.getReleaseName());
 		else
-			return String.format("%d.%d", minor, major);
+			return String.format("%d.%d", major, minor);
 	}
 }
