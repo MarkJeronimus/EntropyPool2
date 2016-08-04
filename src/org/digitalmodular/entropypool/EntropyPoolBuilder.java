@@ -69,7 +69,7 @@ public class EntropyPoolBuilder {
 			try {
 				this.secureRandom = SecureRandomFactory.getInstance(DEFAULT_SECURERANDOM_STRING);
 			} catch (NoSuchAlgorithmException ex2) {
-				throw new LinkageError(null, ex2);
+				throw new LinkageError(ex2.getMessage(), ex2);
 			}
 		}
 	}
@@ -83,7 +83,7 @@ public class EntropyPoolBuilder {
 			try {
 				this.messageDigest = MessageDigest.getInstance(DEFAULT_MESSAGEDIGEST_STRING);
 			} catch (NoSuchAlgorithmException ex2) {
-				throw new LinkageError(null, ex2);
+				throw new LinkageError(ex2.getMessage(), ex2);
 			}
 		}
 	}
@@ -97,7 +97,7 @@ public class EntropyPoolBuilder {
 			try {
 				this.cipher = Cipher.getInstance(DEFAULT_CIPHER_STRING);
 			} catch (NoSuchAlgorithmException | NoSuchPaddingException ex2) {
-				throw new LinkageError(null, ex2);
+				throw new LinkageError(ex2.getMessage(), ex2);
 			}
 		}
 	}
