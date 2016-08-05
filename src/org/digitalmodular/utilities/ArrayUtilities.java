@@ -46,6 +46,12 @@ public enum ArrayUtilities {
 		array[j] = temp;
 	}
 
+	public static byte[] generateRandom(int length, Random random) {
+		byte[] array = new byte[length];
+		random.nextBytes(array);
+		return array;
+	}
+
 	public static int getLengthBeforeWrap(int arrayLength, int offset, int length) {
 		return Math.min(length, arrayLength - offset);
 	}
