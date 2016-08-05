@@ -33,7 +33,7 @@ import org.digitalmodular.utilities.container.Version;
  */
 // Created 2016-07-29
 public interface EntropyPool {
-	Version CURRENT_VERSION = new Version(2, 0, Version.Release.ALPHA, 21);
+	Version CURRENT_VERSION = new Version(2, 0, Version.Release.ALPHA, 22);
 
 	String PROGRAM_TITLE = String.format("EntropyPool v%s © %d DigitalModular",
 	                                     CURRENT_VERSION.toShortString(), LocalDate.now().getYear());
