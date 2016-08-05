@@ -38,13 +38,13 @@ public enum Verifier {
 		if (!condition) throw new IllegalStateException(exceptionMessage);
 	}
 
-	public static void verifyZeroTerminatedString(byte[] array, String exceptionMessage) {
-		boolean zeroEncountered = false;
+	public static void verifyNullTerminatedString(byte[] array, String exceptionMessage) {
+		boolean nullEncountered = false;
 
 		for (byte b : array) {
 			if (b == 0)
-				zeroEncountered = true;
-			else if (zeroEncountered)
+				nullEncountered = true;
+			else if (nullEncountered)
 				throw new IllegalArgumentException(exceptionMessage);
 		}
 	}

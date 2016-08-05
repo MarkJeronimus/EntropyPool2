@@ -83,7 +83,7 @@ public enum ArrayUtilities {
 		return (len1 < len2) ? -1 : 1;
 	}
 
-	public static int compareZeroTerminatedString(byte[] array1, byte[] array2) {
+	public static int compareNullTerminatedString(byte[] array1, byte[] array2) {
 		boolean null1 = array1 == null;
 		boolean null2 = array2 == null;
 
@@ -111,7 +111,7 @@ public enum ArrayUtilities {
 		return (len1 < len2) ? -1 : 1;
 	}
 
-	public static byte[] stringToZeroTerminatedString(String string, int arrayLength) {
+	public static byte[] stringToNullTerminatedString(String string, int arrayLength) {
 		byte[] array;
 
 		try {
