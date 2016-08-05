@@ -35,7 +35,7 @@ import org.digitalmodular.utilities.container.Version;
 public interface EntropyPool {
 	Version CURRENT_VERSION = new Version(2, 0, Version.Release.ALPHA, 20);
 
-	String PROGRAM_TITLE = String.format("EntropyPool v%s © %d DigitalModular123457890",
+	String PROGRAM_TITLE = String.format("EntropyPool v%s © %d DigitalModular",
 	                                     CURRENT_VERSION.toShortString(), LocalDate.now().getYear());
 
 	String MAGIC = "ENTROPYPOOL";

@@ -26,7 +26,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.logging.Logger;
+import java.util.logging.Level;
+import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
 import static org.digitalmodular.entropypool.EntropyPool.MAGIC;
 import static org.digitalmodular.utilities.container.DataIO.readVersion;
 import org.digitalmodular.utilities.LogTimer;
@@ -42,8 +43,6 @@ import org.digitalmodular.utilities.container.Version;
 public enum EntropyPoolLoader {
 	;
 
-	private static final Logger LOGGER = Logger.getLogger(EntropyPoolLoader.class.getName());
-
 	public static EntropyPool loadFromFile(File file) throws IOException {
 		Objects.requireNonNull(file,
 		                       "file == null");
@@ -56,7 +55,7 @@ public enum EntropyPoolLoader {
 		                     "file.canRead() == false: " +
 		                     file);
 
-		LogTimer.start(LOGGER, "Loading Entropy Pool file " + file);
+		LogTimer.start(Level.INFO, "Loading Entropy Pool file " + file);
 
 		EntropyPool pool;
 		try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
@@ -71,7 +70,7 @@ public enum EntropyPoolLoader {
 				LOGGER.warning(in.available() + " extraneous byte(s) detected");
 		}
 
-		LogTimer.finishAndLog(LOGGER, "Loaded the Entropy Pool in {0} seconds");
+		LogTimer.finishAndLog(Level.FINE, "Loaded the Entropy Pool in {0} seconds");
 		return pool;
 	}
 
@@ -79,17 +78,17 @@ public enum EntropyPoolLoader {
 		byte[] magic = new byte[MAGIC.length()];
 		in.readFully(magic);
 
-		LOGGER.info(new String(magic, "UTF-8"));
+		LOGGER.fine("magic: " + new String(magic, "UTF-8"));
 
 		for (int i = 0; i < magic.length; i++)
 			if (magic[i] != (byte) MAGIC.charAt(i))
 				return null;
 
 		String title = in.readUTF();
-		LOGGER.info("title: " + title);
+		LOGGER.fine("title: " + title);
 
 		Version version = readVersion(in);
-		LOGGER.info("version: " + version);
+		LOGGER.fine("version: " + version);
 		return version;
 	}
 

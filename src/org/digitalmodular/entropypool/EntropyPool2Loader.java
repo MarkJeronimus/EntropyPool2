@@ -44,8 +44,6 @@ import org.digitalmodular.utilities.container.LoggingVariable;
 public enum EntropyPool2Loader {
 	;
 
-	public static final Logger LOGGER = Logger.getLogger(EntropyPool2Loader.class.getName());
-
 	static EntropyPool2 readPool(DataInput in) throws IOException {
 		long         createdDate = in.readLong();
 		LoggingCount accessCount = readLoggingCount(in);
@@ -66,9 +64,9 @@ public enum EntropyPool2Loader {
 		EntropyPool2 pool = new EntropyPool2(createdDate, accessCount, secureRandom, messageDigest, cipher,
 		                                     injectedEntropy, extractedEntropy, mixCount, hashX, hashY, buffer);
 
-		LOGGER.info("createdDate: " + Instant.ofEpochMilli(createdDate));
-		LOGGER.info("bufferLength: " + buffer.length);
-		LOGGER.info("availableEntropy: " + pool.getAvailableEntropy());
+		Logger.getGlobal().finer("createdDate: " + Instant.ofEpochMilli(createdDate));
+		Logger.getGlobal().finer("bufferLength: " + buffer.length);
+		Logger.getGlobal().finer("availableEntropy: " + pool.getAvailableEntropy());
 
 		return pool;
 	}
@@ -80,8 +78,8 @@ public enum EntropyPool2Loader {
 		try {
 			secureRandom = SecureRandomFactory.getInstance(algorithm);
 		} catch (NoSuchAlgorithmException ex) {
-			LOGGER.log(Level.WARNING, "SecureRandom cannot be instantiated:" + algorithm +
-			                          ". Using default: " + DEFAULT_SECURERANDOM_STRING, ex);
+			Logger.getGlobal().log(Level.WARNING, "SecureRandom cannot be instantiated:" + algorithm +
+			                                      ". Using default: " + DEFAULT_SECURERANDOM_STRING, ex);
 			try {
 				secureRandom = SecureRandomFactory.getInstance(DEFAULT_SECURERANDOM_STRING);
 			} catch (NoSuchAlgorithmException ex2) {
@@ -102,8 +100,8 @@ public enum EntropyPool2Loader {
 		try {
 			messageDigest = MessageDigest.getInstance(algorithm);
 		} catch (NoSuchAlgorithmException ex) {
-			LOGGER.log(Level.WARNING, "MessageDigest cannot be instantiated: " + algorithm +
-			                          ". Using default: " + DEFAULT_MESSAGEDIGEST_STRING, ex);
+			Logger.getGlobal().log(Level.WARNING, "MessageDigest cannot be instantiated: " + algorithm +
+			                                      ". Using default: " + DEFAULT_MESSAGEDIGEST_STRING, ex);
 			try {
 				messageDigest = MessageDigest.getInstance(DEFAULT_MESSAGEDIGEST_STRING);
 			} catch (NoSuchAlgorithmException ex2) {
@@ -124,8 +122,8 @@ public enum EntropyPool2Loader {
 		try {
 			cipher = Cipher.getInstance(algorithm);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException ex) {
-			LOGGER.log(Level.WARNING, "Cipher cannot be instantiated: " + algorithm +
-			                          ". Using default: " + DEFAULT_CIPHER_STRING, ex);
+			Logger.getGlobal().log(Level.WARNING, "Cipher cannot be instantiated: " + algorithm +
+			                                      ". Using default: " + DEFAULT_CIPHER_STRING, ex);
 			try {
 				cipher = Cipher.getInstance(DEFAULT_CIPHER_STRING);
 			} catch (NoSuchAlgorithmException | NoSuchPaddingException ex2) {

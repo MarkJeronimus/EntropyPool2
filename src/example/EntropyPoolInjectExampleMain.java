@@ -11,6 +11,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.swing.SwingUtilities;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.digitalmodular.entropypool.EntropyPool2;
+import org.digitalmodular.utilities.LoggerUtilities;
 import org.digitalmodular.utilities.swing.ShowFileChooserAction;
 
 /**
@@ -24,10 +25,9 @@ public class EntropyPoolInjectExampleMain {
 	private static final File ENTROPY_POOL_FILE_BAK  = new File("r:\\entropypool.bak");
 	private static final File ENTROPY_POOL_FILE_TEMP = new File("r:\\entropypool.tmp");
 
-	private static final Logger LOGGER = Logger.getLogger(EntropyPoolInjectExampleMain.class.getName());
-
 	static {
 		Security.addProvider(new BouncyCastleProvider());
+		LoggerUtilities.configure(Level.ALL);
 	}
 
 	public static void main(String[] args) {
@@ -51,7 +51,7 @@ public class EntropyPoolInjectExampleMain {
 
 			pool.saveToFile(ENTROPY_POOL_FILE, ENTROPY_POOL_FILE_BAK, ENTROPY_POOL_FILE_TEMP);
 		} catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
-			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+			Logger.getGlobal().log(Level.SEVERE, ex.getMessage(), ex);
 		}
 	}
 
@@ -62,8 +62,7 @@ public class EntropyPoolInjectExampleMain {
 				try {
 					pool.injectEntropyFromFileOrDirectory(fileOrDirectory);
 				} catch (IOException ex) {
-					LOGGER
-							.log(Level.SEVERE, ex.getMessage(), ex);
+					Logger.getGlobal().log(Level.SEVERE, ex.getMessage(), ex);
 				}
 			}
 		}

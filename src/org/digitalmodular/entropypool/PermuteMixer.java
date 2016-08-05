@@ -20,7 +20,7 @@
 package org.digitalmodular.entropypool;
 
 import java.security.SecureRandom;
-import java.util.logging.Logger;
+import java.util.logging.Level;
 import static org.digitalmodular.utilities.ArrayUtilities.shuffle;
 import org.digitalmodular.utilities.LogTimer;
 
@@ -40,6 +40,6 @@ public class PermuteMixer implements EntropyPoolMixer {
 
 		shuffle(buffer, random);
 
-		LogTimer.finishAndLog(Logger.getGlobal(), "Whitened the Entropy Pool in {0} seconds");
+		LogTimer.finishAndLog(Level.FINER, "Permuted the Entropy Pool in {0} seconds");
 	}
 }

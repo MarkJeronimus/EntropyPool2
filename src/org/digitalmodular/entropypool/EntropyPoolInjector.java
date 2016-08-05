@@ -25,7 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.logging.Logger;
+import java.util.logging.Level;
 import org.digitalmodular.utilities.LogTimer;
 import org.digitalmodular.utilities.Verifier;
 
@@ -39,8 +39,6 @@ public enum EntropyPoolInjector {
 	;
 
 	private static final int MAX_READ_ARRAY_LENGTH = 1024 * 1024;
-
-	private static final Logger LOGGER = Logger.getLogger(EntropyPoolInjector.class.getName());
 
 	public static void injectEntropyFromFileOrDirectory(EntropyPool pool, File fileOrDirectory) throws IOException {
 		Objects.requireNonNull(pool,
@@ -84,7 +82,7 @@ public enum EntropyPoolInjector {
 		                     "file.canRead() == false: " +
 		                     file);
 
-		LogTimer.start(LOGGER, "Injecting entropy into the Entropy Pool from file " + file);
+		LogTimer.start(Level.INFO, "Injecting entropy into the Entropy Pool from file " + file);
 
 		long remaining = file.length();
 
@@ -107,6 +105,6 @@ public enum EntropyPoolInjector {
 
 		pool.mix();
 
-		LogTimer.finishAndLog(LOGGER, "Injected file into the Entropy Pool in {0} seconds");
+		LogTimer.finishAndLog(Level.FINE, "Injected file into the Entropy Pool in {0} seconds");
 	}
 }

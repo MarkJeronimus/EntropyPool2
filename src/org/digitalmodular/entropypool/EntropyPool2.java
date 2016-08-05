@@ -27,7 +27,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Objects;
-import java.util.logging.Logger;
+import java.util.logging.Level;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import org.digitalmodular.utilities.LogTimer;
@@ -50,8 +50,6 @@ public class EntropyPool2 implements EntropyPool {
 	public static final String DEFAULT_SECURERANDOM_STRING  = "SP800CTR/AES/256/Strong/16777216";
 	public static final String DEFAULT_MESSAGEDIGEST_STRING = "Keccak-512";
 	public static final String DEFAULT_CIPHER_STRING        = "Threefish-1024/EAX/NoPadding";
-
-	private static final Logger LOGGER = Logger.getLogger(EntropyPool2.class.getName());
 
 	private final long         createDate;
 	private final LoggingCount accessCount;
@@ -291,7 +289,7 @@ public class EntropyPool2 implements EntropyPool {
 		mixCount.count();
 		writePointer = 0;
 
-		LogTimer.finishAndLog(LOGGER, "Mixed the Entropy Pool in {0} seconds");
+		LogTimer.finishAndLog(Level.FINE, "Mixed the Entropy Pool in {0} seconds");
 	}
 
 	LoggingCount accessCount()                     { return accessCount; }

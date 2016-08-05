@@ -42,18 +42,18 @@ public class LogTimer {
 		stack.push(System.nanoTime());
 	}
 
-	public static void start(Logger logger, String message) {
-		logger.info(message);
+	public static void start(Level level, String message) {
+		Logger.getGlobal().log(level, message);
 
 		start();
 	}
 
-	public static void finishAndLog(Logger logger, String template) {
+	public static void finishAndLog(Level level, String template) {
 		Deque<Long> stack = THREAD_LOCAL.get();
 
 		if (stack.isEmpty()) throw new IllegalStateException("Not started");
 
 		long elapsed = System.nanoTime() - stack.pop();
-		logger.log(Level.INFO, template, elapsed / 1e9);
+		Logger.getGlobal().log(level, template, elapsed / 1e9);
 	}
 }

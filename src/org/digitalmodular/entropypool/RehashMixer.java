@@ -20,7 +20,7 @@
 package org.digitalmodular.entropypool;
 
 import java.security.MessageDigest;
-import java.util.logging.Logger;
+import java.util.logging.Level;
 import static org.digitalmodular.utilities.MessageDigestUtilities.*;
 import org.digitalmodular.utilities.LogTimer;
 
@@ -85,6 +85,6 @@ public class RehashMixer implements EntropyPoolMixer {
 		pool.hashX(hashX);
 		pool.hashY(hashY);
 
-		LogTimer.finishAndLog(Logger.getGlobal(), "Rehashed the Entropy Pool in {0} seconds");
+		LogTimer.finishAndLog(Level.FINER, "Rehashed the Entropy Pool in {0} seconds");
 	}
 }

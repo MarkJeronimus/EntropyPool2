@@ -21,7 +21,6 @@ package org.digitalmodular.entropypool;
 
 import java.security.MessageDigest;
 import java.security.SecureRandom;
-import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import org.digitalmodular.utilities.container.LoggingCount;
 import org.digitalmodular.utilities.container.LoggingVariable;
@@ -34,8 +33,6 @@ import org.digitalmodular.utilities.container.Version;
  */
 // Created 2016-07-27
 public class EntropyPoolBuilder {
-	private static final Logger LOGGER = Logger.getLogger(EntropyPoolBuilder.class.getName());
-
 	private Version version = null;
 
 	private Long         createdDate = null;
