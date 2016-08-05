@@ -98,8 +98,13 @@ public class EntropyPool2 implements EntropyPool {
 	                    LoggingVariable<MessageDigest> messageDigest, LoggingVariable<Cipher> cipher,
 	                    LoggingVariable<Long> injectedEntropy, LoggingVariable<Long> extractedEntropy,
 	                    LoggingCount mixCount, int hashX, int hashY, byte[] buffer) {
+		requireNonNull(accessCount, "accessCount == null");
+		requireNonNull(secureRandom, "secureRandom == null");
+		requireNonNull(messageDigest, "messageDigest == null");
+		requireNonNull(cipher, "cipher == null");
 		requireThat(injectedEntropy.get() >= 0, "injectedEntropy.value < 0: " + injectedEntropy.get());
 		requireThat(extractedEntropy.get() >= 0, "extractedEntropy.value < 0: " + extractedEntropy.get());
+		requireNonNull(mixCount, "mixCount == null");
 		requireThat(hashX >= 0, "hashX < 0: " + hashX);
 		requireThat(hashX < buffer.length, "hashX not in range [0,buffer.length): " + hashX + " >= " + buffer.length);
 		requireThat(hashY >= 0, "hashY < 0: " + hashY);
