@@ -21,10 +21,10 @@ package org.digitalmodular.utilities;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Objects;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import static java.util.Objects.requireNonNull;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
@@ -32,16 +32,13 @@ import org.bouncycastle.crypto.prng.SP800SecureRandomBuilder;
 
 /**
  * @author Mark Jeronimus
- * @version 2.0
- * @since 2.0
  */
 // Created 2016-07-29
 public enum SecureRandomFactory {
 	;
 
 	public static SecureRandom getInstance(String algorithm) throws NoSuchAlgorithmException {
-		Objects.requireNonNull(algorithm,
-		                       "algorithm = null");
+		requireNonNull(algorithm, "algorithm == null");
 
 		String[] parts = algorithm.split("/");
 		switch (parts[0]) {

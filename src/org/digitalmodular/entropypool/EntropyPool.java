@@ -22,8 +22,7 @@ package org.digitalmodular.entropypool;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Objects;
-import org.digitalmodular.utilities.Verifier;
+import static org.digitalmodular.utilities.Verifier.requireThat;
 import org.digitalmodular.utilities.container.Version;
 
 /**
@@ -33,7 +32,7 @@ import org.digitalmodular.utilities.container.Version;
  */
 // Created 2016-07-29
 public interface EntropyPool {
-	Version CURRENT_VERSION = new Version(2, 0, Version.Release.ALPHA, 22);
+	Version CURRENT_VERSION = new Version(2, 0, Version.Release.ALPHA, 21);
 
 	String PROGRAM_TITLE = String.format("EntropyPool v%s © %d DigitalModular",
 	                                     CURRENT_VERSION.toShortString(), LocalDate.now().getYear());
@@ -49,9 +48,7 @@ public interface EntropyPool {
 	void mix();
 
 	default void injectEntropyFromFileOrDirectory(File fileOrDirectory) throws IOException {
-		Objects.requireNonNull(fileOrDirectory,
-		                       "fileOrDirectory == null");
-		Verifier.requireThat(fileOrDirectory.exists(), "File doesn't exist");
+		requireThat(fileOrDirectory.exists(), "fileOrDirectory doesn't exist: " + fileOrDirectory);
 
 		EntropyPoolInjector.injectEntropyFromFileOrDirectory(this, fileOrDirectory);
 	}

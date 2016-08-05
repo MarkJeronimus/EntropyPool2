@@ -38,8 +38,7 @@ public class ShowFileChooserAction extends AbstractAction {
 	public ShowFileChooserAction(Consumer<File[]> callback) {
 		super("Select files and/or directories");
 
-		Objects.requireNonNull(callback,
-		                       "callback == null");
+		Objects.requireNonNull(callback, "callback == null");
 
 		this.callback = callback;
 

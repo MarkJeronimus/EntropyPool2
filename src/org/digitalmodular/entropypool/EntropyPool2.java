@@ -26,13 +26,13 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Objects;
 import java.util.logging.Level;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
+import static java.util.Objects.requireNonNull;
+import static org.digitalmodular.utilities.Verifier.requireThat;
 import org.digitalmodular.utilities.LogTimer;
 import org.digitalmodular.utilities.SecureRandomFactory;
-import org.digitalmodular.utilities.Verifier;
 import org.digitalmodular.utilities.container.LoggingCount;
 import org.digitalmodular.utilities.container.LoggingVariable;
 
@@ -74,8 +74,8 @@ public class EntropyPool2 implements EntropyPool {
 			new PermuteMixer(),
 			new RehashMixer());
 
-	public EntropyPool2(int newSize) throws NoSuchAlgorithmException, NoSuchPaddingException {
-		Verifier.requireThat(newSize > 0, "newSize <= 0: " + newSize);
+	public EntropyPool2(int size) throws NoSuchAlgorithmException, NoSuchPaddingException {
+		requireThat(size > 0, "size <= 0: " + size);
 
 		createDate = System.currentTimeMillis();
 		accessCount = new LoggingCount();
@@ -91,83 +91,22 @@ public class EntropyPool2 implements EntropyPool {
 		hashX = 0;
 		hashY = 0;
 
-		buffer = new byte[newSize];
+		buffer = new byte[size];
 	}
 
 	public EntropyPool2(long createDate, LoggingCount accessCount, LoggingVariable<SecureRandom> secureRandom,
 	                    LoggingVariable<MessageDigest> messageDigest, LoggingVariable<Cipher> cipher,
 	                    LoggingVariable<Long> injectedEntropy, LoggingVariable<Long> extractedEntropy,
 	                    LoggingCount mixCount, int hashX, int hashY, byte[] buffer) {
-		Objects.requireNonNull(accessCount,
-		                       "accessCount == null");
-		Verifier.requireThat(accessCount.getCountDate() == 0 ||
-		                     accessCount.getCountDate() >= createDate,
-		                     "accessCount.countDate < createdDate: " +
-		                     accessCount.getCountDate() + " < " + createDate);
-		Objects.requireNonNull(secureRandom, "secureRandom == null");
-		Verifier.requireThat(secureRandom.getModifyDate() == 0 ||
-		                     secureRandom.getModifyDate() >= createDate,
-		                     "secureRandom.modifyDate < createdDate: " +
-		                     secureRandom.getModifyDate() + " < " + createDate);
-		Objects.requireNonNull(messageDigest,
-		                       "messageDigest == null");
-		Verifier.requireThat(messageDigest.getModifyDate() == 0 ||
-		                     messageDigest.getModifyDate() >= createDate,
-		                     "messageDigest.modifyDate < createdDate: " +
-		                     messageDigest.getModifyDate() + " < " + createDate);
-		Objects.requireNonNull(cipher,
-		                       "cipher == null");
-		Verifier.requireThat(cipher.getModifyDate() == 0 ||
-		                     cipher.getModifyDate() >= createDate,
-		                     "cipher.modifyDate < createdDate: " +
-		                     cipher.getModifyDate() + " < " + createDate);
-		Objects.requireNonNull(injectedEntropy,
-		                       "injectedEntropy == null");
-		Verifier.requireThat(injectedEntropy.get() >= 0,
-		                     "injectedEntropy.value < 0: " +
-		                     injectedEntropy.get());
-		Verifier.requireThat(injectedEntropy.get() <= buffer.length * 8,
-		                     "injectedEntropy.value > buffer.length * 8: " +
-		                     injectedEntropy.get() + " > " + buffer.length * 8);
-		Verifier.requireThat(injectedEntropy.getModifyDate() == 0 ||
-		                     injectedEntropy.getModifyDate() >= createDate,
-		                     "injectedEntropy.modifyDate < createdDate: " +
-		                     injectedEntropy.getModifyDate() + " < " + createDate);
-		Objects.requireNonNull(extractedEntropy,
-		                       "extractedEntropy == null");
-		Verifier.requireThat(extractedEntropy.get() >= 0,
-		                     "extractedEntropy.value < 0: " +
-		                     extractedEntropy.get());
-		Verifier.requireThat(extractedEntropy.get() <= buffer.length * 8,
-		                     "extractedEntropy.value > buffer.length * 8: " +
-		                     extractedEntropy.get() + " > " + buffer.length * 8);
-		Verifier.requireThat(extractedEntropy.getModifyDate() == 0 ||
-		                     extractedEntropy.getModifyDate() >= createDate,
-		                     "extractedEntropy.modifyDate < createdDate: " +
-		                     extractedEntropy.getModifyDate() + " < " + createDate);
-		Objects.requireNonNull(mixCount,
-		                       "mixCount == null");
-		Verifier.requireThat(mixCount.getCountDate() == 0 ||
-		                     mixCount.getCountDate() >= createDate,
-		                     "mixCount.modifyDate < createdDate: " +
-		                     mixCount.getCountDate() + " < " + createDate);
-		Verifier.requireThat(hashX >= 0,
-		                     "hashX < 0: " +
-		                     hashX);
-		Verifier.requireThat(hashX < buffer.length,
-		                     "hashX >= buffer.length: " +
-		                     hashX + " >= " + buffer.length);
-		Verifier.requireThat(hashY >= 0,
-		                     "hashY < 0: " +
-		                     hashY);
-		Verifier.requireThat(hashY < buffer.length,
-		                     "hashY >= buffer.length: " +
-		                     hashY + " >= " + buffer.length);
-		Objects.requireNonNull(buffer,
-		                       "buffer == null");
-		Verifier.requireThat(buffer.length >= messageDigest.get().getDigestLength(),
-		                     "buffer.length < messageDigest.digestLength: " +
-		                     buffer.length + " < " + messageDigest.get().getDigestLength());
+		requireThat(injectedEntropy.get() >= 0, "injectedEntropy.value < 0: " + injectedEntropy.get());
+		requireThat(extractedEntropy.get() >= 0, "extractedEntropy.value < 0: " + extractedEntropy.get());
+		requireThat(hashX >= 0, "hashX < 0: " + hashX);
+		requireThat(hashX < buffer.length, "hashX not in range [0,buffer.length): " + hashX + " >= " + buffer.length);
+		requireThat(hashY >= 0, "hashY < 0: " + hashY);
+		requireThat(hashY < buffer.length, "hashY not in range [0,buffer.length): " + hashY + " >= " + buffer.length);
+		requireThat(buffer.length >= messageDigest.get().getDigestLength(),
+		            "buffer.length < messageDigest.digestLength: " +
+		            buffer.length + " < " + messageDigest.get().getDigestLength());
 
 		this.createDate = createDate;
 		this.accessCount = accessCount;
@@ -187,14 +126,8 @@ public class EntropyPool2 implements EntropyPool {
 	}
 
 	public static EntropyPool2 loadFromFile(File poolFile) throws IOException {
-		Objects.requireNonNull(poolFile,
-		                       "poolFile == null");
-		Verifier.requireThat(poolFile.exists(),
-		                     "poolFile.exists() == false: " +
-		                     poolFile);
-		Verifier.requireThat(poolFile.canRead(),
-		                     "poolFile.canRead() == false: " +
-		                     poolFile);
+		requireThat(poolFile.exists(), "poolFile.exists() == false: " + poolFile);
+		requireThat(poolFile.canRead(), "poolFile.canRead() == false: " + poolFile);
 
 		EntropyPool pool = EntropyPoolLoader.loadFromFile(poolFile);
 
@@ -206,12 +139,9 @@ public class EntropyPool2 implements EntropyPool {
 	}
 
 	public void saveToFile(File poolFile, File bakFile, File tempFile) throws IOException {
-		Objects.requireNonNull(poolFile,
-		                       "poolFile == null");
-		Objects.requireNonNull(bakFile,
-		                       "bakFile == null");
-		Objects.requireNonNull(tempFile,
-		                       "tempFile == null");
+		requireNonNull(poolFile, "poolFile == null");
+		requireNonNull(bakFile, "bakFile == null");
+		requireNonNull(tempFile, "tempFile == null");
 
 		EntropyPool2Saver.saveToFile(this, tempFile);
 
@@ -261,10 +191,7 @@ public class EntropyPool2 implements EntropyPool {
 
 	@Override
 	public void injectEntropy(byte[] bytes, int entropyBits) {
-		Objects.requireNonNull(bytes,
-		                       "bytes == null");
-		Verifier.requireThat(bytes.length > 0,
-		                     "bytes.length == 0");
+		requireThat(bytes.length > 0, "bytes.length == 0");
 
 		for (byte b : bytes) {
 			buffer[writePointer++] ^= b;

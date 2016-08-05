@@ -19,7 +19,7 @@
 
 package org.digitalmodular.utilities.container;
 
-import org.digitalmodular.utilities.Verifier;
+import static org.digitalmodular.utilities.Verifier.requireThat;
 
 /**
  * @author Mark Jeronimus
@@ -31,9 +31,7 @@ public class LoggingCount {
 	private long countDate;
 
 	public LoggingCount(int count, long countDate) {
-		Verifier.requireThat(count >= 0,
-		                     "count < 0: " +
-		                     count);
+		requireThat(count >= 0, "count < 0: " + count);
 
 		this.count = count;
 		this.countDate = countDate;

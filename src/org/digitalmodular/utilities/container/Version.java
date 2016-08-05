@@ -19,10 +19,10 @@
 
 package org.digitalmodular.utilities.container;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 import static org.digitalmodular.utilities.FNV.hashFNV;
 import static org.digitalmodular.utilities.FNV.startFNV;
-import org.digitalmodular.utilities.Verifier;
+import static org.digitalmodular.utilities.Verifier.requireThat;
 
 /**
  * @author Mark Jeronimus
@@ -63,17 +63,10 @@ public class Version {
 	private final int     revision;
 
 	public Version(int major, int minor, Release release, int revision) {
-		Verifier.requireThat(major >= 0 && major <= Byte.MAX_VALUE,
-		                     "major not in range [0,Byte.MAX_VALUE]: " +
-		                     major);
-		Verifier.requireThat(minor >= 0 && minor <= Byte.MAX_VALUE,
-		                     "minor not in range [0,Byte.MAX_VALUE]: " +
-		                     minor);
-		Objects.requireNonNull(release,
-		                       "release == null");
-		Verifier.requireThat(revision >= 1,
-		                     "revision not in range [1,Integer.MAX_VALUE]: " +
-		                     revision);
+		requireThat(major >= 0 && major <= Byte.MAX_VALUE, "major not in range [0,Byte.MAX_VALUE]: " + major);
+		requireThat(minor >= 0 && minor <= Byte.MAX_VALUE, "minor not in range [0,Byte.MAX_VALUE]: " + minor);
+		requireNonNull(release, "release == null");
+		requireThat(revision >= 1, "revision not in range [1,Integer.MAX_VALUE]: " + revision);
 
 		this.major = (byte) major;
 		this.minor = (byte) minor;

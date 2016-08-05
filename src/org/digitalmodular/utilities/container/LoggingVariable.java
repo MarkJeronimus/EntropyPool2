@@ -19,9 +19,8 @@
 
 package org.digitalmodular.utilities.container;
 
-import java.util.Objects;
 import java.util.function.UnaryOperator;
-import org.digitalmodular.utilities.Verifier;
+import static org.digitalmodular.utilities.Verifier.requireThat;
 
 /**
  * @author Mark Jeronimus
@@ -34,10 +33,7 @@ public class LoggingVariable<T> {
 	private long modifyDate;
 
 	public LoggingVariable(T value, int modifyCount, long modifyDate) {
-		Objects.requireNonNull(value);
-		Verifier.requireThat(modifyCount >= 0,
-		                     "modifyCount < 0: " +
-		                     modifyCount);
+		requireThat(modifyCount >= 0, "modifyCount < 0: " + modifyCount);
 
 		this.value = value;
 		this.modifyCount = modifyCount;

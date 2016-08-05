@@ -25,13 +25,12 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.logging.Level;
 import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
 import static org.digitalmodular.entropypool.EntropyPool.MAGIC;
+import static org.digitalmodular.utilities.Verifier.requireThat;
 import static org.digitalmodular.utilities.container.DataIO.readVersion;
 import org.digitalmodular.utilities.LogTimer;
-import org.digitalmodular.utilities.Verifier;
 import org.digitalmodular.utilities.container.Version;
 
 /**
@@ -44,16 +43,9 @@ public enum EntropyPoolLoader {
 	;
 
 	public static EntropyPool loadFromFile(File file) throws IOException {
-		Objects.requireNonNull(file,
-		                       "file == null");
-		Verifier.requireThat(file.exists(),
-		                     "file.exists() == false");
-		Verifier.requireThat(file.isFile(),
-		                     "file.isFile() == false: " +
-		                     file);
-		Verifier.requireThat(file.canRead(),
-		                     "file.canRead() == false: " +
-		                     file);
+		requireThat(file.exists(), "file.exists() == false: " + file);
+		requireThat(file.isFile(), "file.isFile() == false: " + file);
+		requireThat(file.canRead(), "file.canRead() == false: " + file);
 
 		LogTimer.start(Level.INFO, "Loading Entropy Pool file " + file);
 

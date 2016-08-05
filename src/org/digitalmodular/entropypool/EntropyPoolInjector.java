@@ -24,10 +24,10 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.logging.Level;
+import static java.util.Objects.requireNonNull;
+import static org.digitalmodular.utilities.Verifier.requireThat;
 import org.digitalmodular.utilities.LogTimer;
-import org.digitalmodular.utilities.Verifier;
 
 /**
  * @author Mark Jeronimus
@@ -41,13 +41,8 @@ public enum EntropyPoolInjector {
 	private static final int MAX_READ_ARRAY_LENGTH = 1024 * 1024;
 
 	public static void injectEntropyFromFileOrDirectory(EntropyPool pool, File fileOrDirectory) throws IOException {
-		Objects.requireNonNull(pool,
-		                       "pool == null");
-		Objects.requireNonNull(fileOrDirectory,
-		                       "fileOrDirectory == null");
-		Verifier.requireThat(fileOrDirectory.exists(),
-		                     "fileOrDirectory.exists() == false: " +
-		                     fileOrDirectory);
+		requireNonNull(pool, "pool == null");
+		requireThat(fileOrDirectory.exists(), "fileOrDirectory.exists() == false: " + fileOrDirectory);
 
 		if (fileOrDirectory.isDirectory())
 			injectDirectory(pool, fileOrDirectory);
@@ -58,29 +53,17 @@ public enum EntropyPoolInjector {
 	}
 
 	public static void injectDirectory(EntropyPool pool, File directory) throws IOException {
-		Objects.requireNonNull(pool,
-		                       "pool == null");
-		Objects.requireNonNull(directory,
-		                       "directory == null");
-		Verifier.requireThat(directory.exists(),
-		                     "directory.exists() == false: " +
-		                     directory);
+		requireNonNull(pool, "pool == null");
+		requireThat(directory.exists(), "directory.exists() == false: " + directory);
 
 		for (File file : directory.listFiles())
 			injectEntropyFromFileOrDirectory(pool, file);
 	}
 
 	public static void injectFile(EntropyPool pool, File file) throws IOException {
-		Objects.requireNonNull(pool,
-		                       "pool == null");
-		Objects.requireNonNull(file,
-		                       "file == null");
-		Verifier.requireThat(file.exists(),
-		                     "file.exists() == false: " +
-		                     file);
-		Verifier.requireThat(file.canRead(),
-		                     "file.canRead() == false: " +
-		                     file);
+		requireNonNull(pool, "pool == null");
+		requireThat(file.exists(), "file.exists() == false: " + file);
+		requireThat(file.canRead(), "file.canRead() == false: " + file);
 
 		LogTimer.start(Level.INFO, "Injecting entropy into the Entropy Pool from file " + file);
 

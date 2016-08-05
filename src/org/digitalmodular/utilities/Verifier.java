@@ -38,7 +38,7 @@ public enum Verifier {
 		if (!condition) throw new IllegalStateException(exceptionMessage);
 	}
 
-	public static void checkZeroTerminatedString(byte[] array, String exceptionMessage) {
+	public static void verifyZeroTerminatedString(byte[] array, String exceptionMessage) {
 		boolean zeroEncountered = false;
 
 		for (byte b : array) {

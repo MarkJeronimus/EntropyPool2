@@ -24,12 +24,12 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.logging.Level;
+import static java.util.Objects.requireNonNull;
 import static org.digitalmodular.entropypool.EntropyPool.*;
+import static org.digitalmodular.utilities.Verifier.requireThat;
 import static org.digitalmodular.utilities.container.DataIO.*;
 import org.digitalmodular.utilities.LogTimer;
-import org.digitalmodular.utilities.Verifier;
 
 /**
  * @author Mark Jeronimus
@@ -41,16 +41,9 @@ public enum EntropyPool2Saver {
 	;
 
 	public static void saveToFile(EntropyPool2 pool, File file) throws IOException {
-		Objects.requireNonNull(pool,
-		                       "pool == null");
-		Objects.requireNonNull(file,
-		                       "file == null");
-		Verifier.requireThat(!file.exists() || file.isFile(),
-		                     "file.isFile() == false: " +
-		                     file);
-		Verifier.requireThat(!file.exists() || file.canWrite(),
-		                     "file.canWrite() == false: " +
-		                     file);
+		requireNonNull(pool, "pool == null");
+		requireThat(!file.exists() || file.isFile(), "file.isFile() == false: " + file);
+		requireThat(!file.exists() || file.canWrite(), "file.canWrite() == false: " + file);
 
 		LogTimer.start(Level.INFO, "Saving Entropy Pool file " + file);
 
