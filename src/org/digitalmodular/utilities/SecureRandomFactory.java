@@ -24,7 +24,6 @@ import java.security.SecureRandom;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import static java.util.Objects.requireNonNull;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
@@ -38,8 +37,6 @@ public enum SecureRandomFactory {
 	;
 
 	public static SecureRandom getInstance(String algorithm) throws NoSuchAlgorithmException {
-		requireNonNull(algorithm, "algorithm == null");
-
 		String[] parts = algorithm.split("/");
 		switch (parts[0]) {
 			case "Strong":
