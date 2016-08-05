@@ -37,4 +37,15 @@ public enum Verifier {
 	public static void requireState(boolean condition, String exceptionMessage) {
 		if (!condition) throw new IllegalStateException(exceptionMessage);
 	}
+
+	public static void checkZeroTerminatedString(byte[] array, String exceptionMessage) {
+		boolean zeroEncountered = false;
+
+		for (byte b : array) {
+			if (b == 0)
+				zeroEncountered = true;
+			else if (zeroEncountered)
+				throw new IllegalArgumentException(exceptionMessage);
+		}
+	}
 }

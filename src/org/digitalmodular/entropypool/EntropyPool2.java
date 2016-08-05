@@ -34,7 +34,7 @@ import org.digitalmodular.utilities.LogTimer;
 import org.digitalmodular.utilities.SecureRandomFactory;
 import org.digitalmodular.utilities.Verifier;
 import org.digitalmodular.utilities.container.LoggingCount;
-import org.digitalmodular.utilities.container.LoggingLong;
+import org.digitalmodular.utilities.container.LoggingVariable;
 
 /**
  * @author Mark Jeronimus
@@ -45,7 +45,7 @@ import org.digitalmodular.utilities.container.LoggingLong;
 public class EntropyPool2 implements EntropyPool {
 	// The numbers that are 'most coprime' to 64 are 19 and 45. (Hexacontatetragram{64/19})
 	// Subtracting 64s until total file size < 64kiB.
-	public static final int DEFAULT_ENTROPY_POOL_BYTE_LENGTH = 65536 - 64 * 3 - 45;
+	public static final int DEFAULT_ENTROPY_POOL_BYTE_LENGTH = 65536 - 64 * 4 - 19;
 
 	public static final String DEFAULT_SECURERANDOM_STRING  = "SP800CTR/AES/256/Strong/16777216";
 	public static final String DEFAULT_MESSAGEDIGEST_STRING = "Keccak-512";
@@ -53,22 +53,23 @@ public class EntropyPool2 implements EntropyPool {
 
 	private static final Logger LOGGER = Logger.getLogger(EntropyPool2.class.getName());
 
-	private final SecureRandom  secureRandom;
-	private final MessageDigest messageDigest;
-	private final Cipher        cipher;
+	private final long         createDate;
+	private final LoggingCount accessCount;
 
-	private final byte[] buffer;
+	private final LoggingVariable<SecureRandom>  secureRandom;
+	private final LoggingVariable<MessageDigest> messageDigest;
+	private final LoggingVariable<Cipher>        cipher;
 
-	private final long createdDate;
-
-	private final LoggingCount mixCount;
-	private final LoggingLong  injectedEntropy;
-	private final LoggingLong  extractedEntropy;
+	private final LoggingVariable<Long> injectedEntropy;
+	private final LoggingVariable<Long> extractedEntropy;
+	private final LoggingCount          mixCount;
 
 	private int hashX;
 	private int hashY;
 
-	private int writePointer;
+	private final byte[] buffer;
+
+	private transient int writePointer = 0;
 
 	private final EntropyPoolMixer mixer = new MultipleMixer(
 			new WhitenMixer(),
@@ -78,63 +79,80 @@ public class EntropyPool2 implements EntropyPool {
 	public EntropyPool2(int newSize) throws NoSuchAlgorithmException, NoSuchPaddingException {
 		Verifier.requireThat(newSize > 0, "newSize <= 0: " + newSize);
 
-		secureRandom = SecureRandomFactory.getInstance(DEFAULT_SECURERANDOM_STRING);
-		messageDigest = MessageDigest.getInstance(DEFAULT_MESSAGEDIGEST_STRING);
-		cipher = Cipher.getInstance(DEFAULT_CIPHER_STRING);
-		buffer = new byte[newSize];
-		createdDate = System.currentTimeMillis();
+		createDate = System.currentTimeMillis();
+		accessCount = new LoggingCount();
+
+		secureRandom = new LoggingVariable<>(SecureRandomFactory.getInstance(DEFAULT_SECURERANDOM_STRING));
+		messageDigest = new LoggingVariable<>(MessageDigest.getInstance(DEFAULT_MESSAGEDIGEST_STRING));
+		cipher = new LoggingVariable<>(Cipher.getInstance(DEFAULT_CIPHER_STRING));
+
+		injectedEntropy = new LoggingVariable<>(0L);
+		extractedEntropy = new LoggingVariable<>(0L);
 		mixCount = new LoggingCount();
-		injectedEntropy = new LoggingLong(0);
-		extractedEntropy = new LoggingLong(0);
 
 		hashX = 0;
 		hashY = 0;
 
-		writePointer = 0;
+		buffer = new byte[newSize];
 	}
 
-	public EntropyPool2(SecureRandom secureRandom, MessageDigest messageDigest, Cipher cipher,
-	                    byte[] buffer, long createdDate, LoggingCount mixCount,
-	                    LoggingLong injectedEntropy, LoggingLong extractedEntropy,
-
-	                    int hashX, int hashY) {
+	public EntropyPool2(long createDate, LoggingCount accessCount, LoggingVariable<SecureRandom> secureRandom,
+	                    LoggingVariable<MessageDigest> messageDigest, LoggingVariable<Cipher> cipher,
+	                    LoggingVariable<Long> injectedEntropy, LoggingVariable<Long> extractedEntropy,
+	                    LoggingCount mixCount, int hashX, int hashY, byte[] buffer) {
+		Objects.requireNonNull(accessCount,
+		                       "accessCount == null");
+		Verifier.requireThat(accessCount.getCountDate() == 0 ||
+		                     accessCount.getCountDate() >= createDate,
+		                     "accessCount.countDate < createdDate: " +
+		                     accessCount.getCountDate() + " < " + createDate);
 		Objects.requireNonNull(secureRandom, "secureRandom == null");
+		Verifier.requireThat(secureRandom.getModifyDate() == 0 ||
+		                     secureRandom.getModifyDate() >= createDate,
+		                     "secureRandom.modifyDate < createdDate: " +
+		                     secureRandom.getModifyDate() + " < " + createDate);
 		Objects.requireNonNull(messageDigest,
 		                       "messageDigest == null");
+		Verifier.requireThat(messageDigest.getModifyDate() == 0 ||
+		                     messageDigest.getModifyDate() >= createDate,
+		                     "messageDigest.modifyDate < createdDate: " +
+		                     messageDigest.getModifyDate() + " < " + createDate);
 		Objects.requireNonNull(cipher,
 		                       "cipher == null");
-		Objects.requireNonNull(buffer,
-		                       "buffer == null");
-		Verifier.requireThat(buffer.length >= messageDigest.getDigestLength(),
-		                     "buffer.length < messageDigest.digestLength: " +
-		                     buffer.length + " < " + messageDigest.getDigestLength());
-		Verifier.requireThat(createdDate >= 0,
-		                     "createdDate <= 0: " +
-		                     createdDate);
-		Objects.requireNonNull(mixCount,
-		                       "mixCount == null");
-		Verifier.requireThat(mixCount.getModifyDate() == 0 ||
-		                     mixCount.getModifyDate() >= createdDate,
-		                     "mixCount.modifyDate < createdDate: " +
-		                     mixCount.getModifyDate() + " < " + createdDate);
+		Verifier.requireThat(cipher.getModifyDate() == 0 ||
+		                     cipher.getModifyDate() >= createDate,
+		                     "cipher.modifyDate < createdDate: " +
+		                     cipher.getModifyDate() + " < " + createDate);
 		Objects.requireNonNull(injectedEntropy,
 		                       "injectedEntropy == null");
-		Verifier.requireThat(injectedEntropy.getValue() <= buffer.length * 8,
+		Verifier.requireThat(injectedEntropy.get() >= 0,
+		                     "injectedEntropy.value < 0: " +
+		                     injectedEntropy.get());
+		Verifier.requireThat(injectedEntropy.get() <= buffer.length * 8,
 		                     "injectedEntropy.value > buffer.length * 8: " +
-		                     injectedEntropy + " > " + buffer.length * 8);
+		                     injectedEntropy.get() + " > " + buffer.length * 8);
 		Verifier.requireThat(injectedEntropy.getModifyDate() == 0 ||
-		                     injectedEntropy.getModifyDate() >= createdDate,
+		                     injectedEntropy.getModifyDate() >= createDate,
 		                     "injectedEntropy.modifyDate < createdDate: " +
-		                     injectedEntropy.getModifyDate() + " < " + createdDate);
+		                     injectedEntropy.getModifyDate() + " < " + createDate);
 		Objects.requireNonNull(extractedEntropy,
 		                       "extractedEntropy == null");
-		Verifier.requireThat(extractedEntropy.getValue() <= buffer.length * 8,
+		Verifier.requireThat(extractedEntropy.get() >= 0,
+		                     "extractedEntropy.value < 0: " +
+		                     extractedEntropy.get());
+		Verifier.requireThat(extractedEntropy.get() <= buffer.length * 8,
 		                     "extractedEntropy.value > buffer.length * 8: " +
-		                     extractedEntropy + " > " + buffer.length * 8);
+		                     extractedEntropy.get() + " > " + buffer.length * 8);
 		Verifier.requireThat(extractedEntropy.getModifyDate() == 0 ||
-		                     extractedEntropy.getModifyDate() >= createdDate,
+		                     extractedEntropy.getModifyDate() >= createDate,
 		                     "extractedEntropy.modifyDate < createdDate: " +
-		                     extractedEntropy.getModifyDate() + " < " + createdDate);
+		                     extractedEntropy.getModifyDate() + " < " + createDate);
+		Objects.requireNonNull(mixCount,
+		                       "mixCount == null");
+		Verifier.requireThat(mixCount.getCountDate() == 0 ||
+		                     mixCount.getCountDate() >= createDate,
+		                     "mixCount.modifyDate < createdDate: " +
+		                     mixCount.getCountDate() + " < " + createDate);
 		Verifier.requireThat(hashX >= 0,
 		                     "hashX < 0: " +
 		                     hashX);
@@ -147,20 +165,23 @@ public class EntropyPool2 implements EntropyPool {
 		Verifier.requireThat(hashY < buffer.length,
 		                     "hashY >= buffer.length: " +
 		                     hashY + " >= " + buffer.length);
+		Objects.requireNonNull(buffer,
+		                       "buffer == null");
+		Verifier.requireThat(buffer.length >= messageDigest.get().getDigestLength(),
+		                     "buffer.length < messageDigest.digestLength: " +
+		                     buffer.length + " < " + messageDigest.get().getDigestLength());
 
+		this.createDate = createDate;
+		this.accessCount = accessCount;
 		this.secureRandom = secureRandom;
 		this.messageDigest = messageDigest;
 		this.cipher = cipher;
-		this.buffer = buffer;
-		this.mixCount = mixCount;
-		this.createdDate = createdDate;
 		this.injectedEntropy = injectedEntropy;
 		this.extractedEntropy = extractedEntropy;
-
+		this.mixCount = mixCount;
 		this.hashX = hashX;
 		this.hashY = hashY;
-
-		this.writePointer = 0;
+		this.buffer = buffer;
 	}
 
 	public static EntropyPool2 newInstance() throws NoSuchAlgorithmException, NoSuchPaddingException {
@@ -181,7 +202,7 @@ public class EntropyPool2 implements EntropyPool {
 
 		if (!(pool instanceof EntropyPool2))
 			throw new IllegalArgumentException("File is not version 2.0. You can use" +
-			                                   " EntropyPoolLoader.loadPoolFromFile() to load any version.");
+			                                   " EntropyPoolLoader.loadPoolFromFile() to load any file version.");
 
 		return (EntropyPool2) pool;
 	}
@@ -202,9 +223,25 @@ public class EntropyPool2 implements EntropyPool {
 		Files.move(tempFile.toPath(), poolFile.toPath(), StandardCopyOption.ATOMIC_MOVE);
 	}
 
-	public long getInjectedEntropy()  { return injectedEntropy.getValue(); }
+	public long getCreateDate()             { return createDate; }
 
-	public long getExtractedEntropy() { return extractedEntropy.getValue(); }
+	public int getAccessCount()             { return accessCount.get(); }
+
+	public SecureRandom getSecureRandom()   { return secureRandom.get(); }
+
+	public MessageDigest getMessageDigest() { return messageDigest.get(); }
+
+	public Cipher getCipher()               { return cipher.get(); }
+
+	public long getInjectedEntropy()        { return injectedEntropy.get(); }
+
+	public long getExtractedEntropy()       { return extractedEntropy.get(); }
+
+	public int getMixCount()                { return mixCount.get(); }
+
+	public void incrementAccessCount() {
+		accessCount.count();
+	}
 
 	@Override
 	public void injectEntropy(byte[] bytes, int entropyBits) {
@@ -222,14 +259,14 @@ public class EntropyPool2 implements EntropyPool {
 			}
 		}
 
-		injectedEntropy.set(Math.min(injectedEntropy.getValue() + entropyBits, buffer.length * 8));
+		injectedEntropy.modify(oldValue -> Math.min(oldValue + entropyBits, buffer.length * 8));
 	}
 
 	@Override
 	public byte[] extractEntropy(int numBytes) {
 		if (numBytes * 8 > getAvailableEntropy())
 			throw new IllegalStateException(
-					"Not enough entropy available: " + numBytes * 8 + " > " + getAvailableEntropy());
+					"More entropy requested than is available: " + numBytes * 8 + " > " + getAvailableEntropy());
 
 		if (writePointer > 0)
 			mix();
@@ -240,7 +277,7 @@ public class EntropyPool2 implements EntropyPool {
 
 		mix();
 
-		extractedEntropy.add(numBytes * 8);
+		extractedEntropy.modify(oldValue -> Math.addExact(oldValue, numBytes * 8));
 
 		return bytes;
 	}
@@ -251,33 +288,34 @@ public class EntropyPool2 implements EntropyPool {
 
 		mixer.mix(this);
 
-		mixCount.increment();
+		mixCount.count();
 		writePointer = 0;
 
 		LogTimer.finishAndLog(LOGGER, "Mixed the Entropy Pool in {0} seconds");
 	}
 
-	SecureRandom secureRandom()    { return secureRandom; }
+	LoggingCount accessCount()                     { return accessCount; }
 
-	MessageDigest messageDigest()  { return messageDigest; }
+	LoggingVariable<SecureRandom> secureRandom()   { return secureRandom; }
 
-	Cipher cipher()                { return cipher; }
+	LoggingVariable<MessageDigest> messageDigest() { return messageDigest; }
 
-	byte[] buffer()                { return buffer; }
+	LoggingVariable<Cipher> cipher()               { return cipher; }
 
-	long createdDate()             { return createdDate; }
+	LoggingVariable<Long> injectedEntropy()        { return injectedEntropy; }
 
-	LoggingCount mixCount()        { return mixCount; }
+	LoggingVariable<Long> extractedEntropy()       { return extractedEntropy; }
 
-	LoggingLong injectedEntropy()  { return injectedEntropy; }
+	LoggingCount mixCount()                        { return mixCount; }
 
-	LoggingLong extractedEntropy() { return extractedEntropy; }
+	int hashX()                                    { return hashX; }
 
-	int hashX()                    { return hashX; }
+	void hashX(int hashX)                          { this.hashX = hashX; }
 
-	void hashX(int hashX)          { this.hashX = hashX; }
+	int hashY()                                    { return hashY; }
 
-	int hashY()                    { return hashY; }
+	void hashY(int hashY)                          { this.hashY = hashY; }
 
-	void hashY(int hashY)          { this.hashY = hashY; }
+	byte[] buffer()                                { return buffer; }
 }
+

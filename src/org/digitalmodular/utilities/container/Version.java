@@ -87,7 +87,7 @@ public class Version {
 
 	public Release getRelease() { return release; }
 
-	public int getRevision()  { return revision; }
+	public int getRevision()    { return revision; }
 
 	@Override
 	public boolean equals(Object o) {

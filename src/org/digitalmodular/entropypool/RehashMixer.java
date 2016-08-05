@@ -37,7 +37,7 @@ public class RehashMixer implements EntropyPoolMixer {
 	public void mix(EntropyPool2 pool) {
 		LogTimer.start();
 
-		MessageDigest digest = pool.messageDigest();
+		MessageDigest digest = pool.getMessageDigest();
 		byte[]        buffer = pool.buffer();
 
 		int hashX = pool.hashX();
@@ -59,12 +59,17 @@ public class RehashMixer implements EntropyPoolMixer {
 			hashLong(digest, Runtime.getRuntime().maxMemory());
 			hashLong(digest, Runtime.getRuntime().totalMemory());
 
-			hashLong(digest, pool.createdDate());
+			hashLong(digest, pool.getCreateDate());
+			hashLoggingCount(digest, pool.accessCount());
+			hashLoggingVariable(digest, pool.secureRandom());
+			hashLoggingVariable(digest, pool.messageDigest());
+			hashLoggingVariable(digest, pool.cipher());
+			hashLoggingVariable(digest, pool.injectedEntropy());
+			hashLoggingVariable(digest, pool.extractedEntropy());
 			hashLoggingCount(digest, pool.mixCount());
-			hashLoggingLong(digest, pool.injectedEntropy());
-			hashLoggingLong(digest, pool.extractedEntropy());
 			hashInt(digest, hashX);
 			hashInt(digest, hashY);
+			hashInt(digest, buffer.length);
 
 			hashBlockFromBuffer(digest, buffer, hashX);
 			hashBlockFromBuffer(digest, buffer, hashY);

@@ -34,7 +34,7 @@ public class WhitenMixer implements EntropyPoolMixer {
 	public void mix(EntropyPool2 pool) {
 		LogTimer.start();
 
-		SecureRandom random = pool.secureRandom();
+		SecureRandom random = pool.getSecureRandom();
 		byte[]       buffer = pool.buffer();
 
 		for (int i = 0; i < buffer.length; i++)

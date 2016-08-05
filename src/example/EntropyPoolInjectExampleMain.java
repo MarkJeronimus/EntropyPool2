@@ -11,6 +11,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.swing.SwingUtilities;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.digitalmodular.entropypool.EntropyPool2;
+import org.digitalmodular.utilities.swing.ShowFileChooserAction;
 
 /**
  * @author Mark Jeronimus
@@ -41,6 +42,7 @@ public class EntropyPoolInjectExampleMain {
 		try {
 			if (ENTROPY_POOL_FILE.exists() && ENTROPY_POOL_FILE.canRead()) {
 				pool = EntropyPool2.loadFromFile(ENTROPY_POOL_FILE);
+				pool.incrementAccessCount();
 			} else {
 				pool = EntropyPool2.newInstance();
 			}

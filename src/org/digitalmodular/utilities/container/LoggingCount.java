@@ -28,34 +28,34 @@ import org.digitalmodular.utilities.Verifier;
 public class LoggingCount {
 	private int count;
 
-	private long modifyDate;
+	private long countDate;
 
-	public LoggingCount(int count, long modifyDate) {
+	public LoggingCount(int count, long countDate) {
 		Verifier.requireThat(count >= 0,
 		                     "count < 0: " +
 		                     count);
 
 		this.count = count;
-		this.modifyDate = modifyDate;
+		this.countDate = countDate;
 	}
 
 	public LoggingCount() {
 		this(0, 0);
 	}
 
-	public void increment() {
+	public void count() {
 		count++;
 
 		log();
 	}
 
-	private void log() {
-		modifyDate = System.currentTimeMillis();
+	public int get()           { return count; }
+
+	public long getCountDate() { return countDate; }
+
+	public String toString()   { return Integer.toString(count); }
+
+	protected void log() {
+		countDate = System.currentTimeMillis();
 	}
-
-	public int getCount()       { return count; }
-
-	public long getModifyDate() { return modifyDate; }
-
-	public String toString()    { return Integer.toString(count); }
 }

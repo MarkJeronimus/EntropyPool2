@@ -36,8 +36,9 @@ public class EntropyPoolExtractExampleMain {
 	public EntropyPoolExtractExampleMain() {
 		try {
 			pool = EntropyPool2.loadFromFile(ENTROPY_POOL_FILE);
+			pool.incrementAccessCount();
 
-			byte[] entropy = pool.extractEntropy(16);
+			byte[] entropy = pool.extractEntropy(1600);
 			System.out.println("Extracted entropy: " + Arrays.toString(entropy));
 			System.out.println("Available entropy: " + pool.getAvailableEntropy());
 

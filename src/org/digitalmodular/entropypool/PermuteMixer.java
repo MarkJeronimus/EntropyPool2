@@ -35,7 +35,7 @@ public class PermuteMixer implements EntropyPoolMixer {
 	public void mix(EntropyPool2 pool) {
 		LogTimer.start();
 
-		SecureRandom random = pool.secureRandom();
+		SecureRandom random = pool.getSecureRandom();
 		byte[]       buffer = pool.buffer();
 
 		shuffle(buffer, random);

@@ -19,6 +19,8 @@
 
 package org.digitalmodular.utilities;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -57,8 +59,7 @@ public enum ArrayUtilities {
 		boolean null2 = array2 == null;
 
 		if (null1 && null2) return 0;
-		if (null1 != null2)
-			return null2 ? -1 : 1;
+		if (null1 != null2) return null1 ? -1 : 1;
 
 		int len1   = array1.length;
 		int len2   = array2.length;
@@ -69,12 +70,56 @@ public enum ArrayUtilities {
 			int byte2 = array2[i] & 0xFF;
 
 			if (byte1 == byte2) continue;
-
 			return byte1 < byte2 ? -1 : 1;
 		}
 
 		if (len1 == len2) return 0;
+		return (len1 < len2) ? -1 : 1;
+	}
 
-		return len1 < len2 ? -1 : 1;
+	public static int compareZeroTerminatedString(byte[] array1, byte[] array2) {
+		boolean null1 = array1 == null;
+		boolean null2 = array2 == null;
+
+		if (null1 && null2) return 0;
+		if (null1 != null2) return null1 ? -1 : 1;
+
+		int len1   = array1.length;
+		int len2   = array2.length;
+		int length = Math.min(len1, len2);
+
+		for (int i = 0; i < length; i++) {
+			int byte1 = array1[i] & 0xFF;
+			int byte2 = array2[i] & 0xFF;
+
+			if (byte1 == 0 || byte2 == 0) {
+				if (byte1 == 0 && byte2 == 0) continue;
+				return byte1 == 0 ? -1 : 1;
+			}
+
+			if (byte1 == byte2) continue;
+			return byte1 < byte2 ? -1 : 1;
+		}
+
+		if (len1 == len2) return 0;
+		return (len1 < len2) ? -1 : 1;
+	}
+
+	public static byte[] stringToZeroTerminatedString(String string, int arrayLength) {
+		byte[] array;
+
+		try {
+			array = string.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException ex) {
+			throw new LinkageError("UTF-8 not available!", ex);
+		}
+
+		if (array.length > arrayLength) {
+			throw new IllegalArgumentException("String has more than " + array + " bytes: " + array.length +
+			                                   ". How many characters that is depends on UTF-8.");
+		}
+
+		array = Arrays.copyOf(array, arrayLength);
+		return array;
 	}
 }

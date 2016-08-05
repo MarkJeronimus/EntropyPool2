@@ -72,19 +72,20 @@ public enum EntropyPool2Saver {
 	}
 
 	private static void writePool(DataOutputStream out, EntropyPool2 pool) throws IOException {
-		out.writeUTF(pool.secureRandom().getAlgorithm());
-		out.writeUTF(pool.messageDigest().getAlgorithm());
-		out.writeUTF(pool.cipher().getAlgorithm());
+		out.writeLong(pool.getCreateDate());
+		writeLoggingCount(out, pool.accessCount());
 
-		out.writeLong(pool.createdDate());
+		writeLoggingObject(out, pool.secureRandom());
+		writeLoggingObject(out, pool.messageDigest());
+		writeLoggingObject(out, pool.cipher());
+
+		writeLoggingObject(out, pool.injectedEntropy());
+		writeLoggingObject(out, pool.extractedEntropy());
 		writeLoggingCount(out, pool.mixCount());
-		writeLoggingLong(out, pool.injectedEntropy());
-		writeLoggingLong(out, pool.extractedEntropy());
 
 		out.writeInt(pool.hashX());
 		out.writeInt(pool.hashY());
 
-		out.writeInt(pool.buffer().length);
-		out.write(pool.buffer());
+		writeByteArray(out, pool.buffer());
 	}
 }
