@@ -43,9 +43,8 @@ import org.digitalmodular.utilities.container.LoggingVariable;
  */
 // Created 2016-07-25
 public class EntropyPool2 implements EntropyPool {
-	// The numbers that are 'most coprime' to 64 are 19 and 45. (Hexacontatetragram{64/19})
-	// Subtracting 64s until total file size < 64kiB.
-	public static final int DEFAULT_ENTROPY_POOL_BYTE_LENGTH = 65536 - 64 * 4 - 19;
+	// The number in the range [65261,65275) that's 'most coprime' to 64 is 65261.
+	public static final int DEFAULT_ENTROPY_POOL_BYTE_LENGTH = 65261;
 
 	public static final String DEFAULT_SECURERANDOM_STRING  = "SP800CTR/AES/256/Strong/16777216";
 	public static final String DEFAULT_MESSAGEDIGEST_STRING = "Keccak-512";
