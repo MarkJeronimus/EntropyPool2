@@ -28,7 +28,7 @@ import java.util.logging.Level;
 import static java.util.Objects.requireNonNull;
 import static org.digitalmodular.entropypool.EntropyPool.*;
 import static org.digitalmodular.utilities.Verifier.requireThat;
-import static org.digitalmodular.utilities.container.DataIO.*;
+import static org.digitalmodular.utilities.DataIO.*;
 import org.digitalmodular.utilities.LogTimer;
 
 /**

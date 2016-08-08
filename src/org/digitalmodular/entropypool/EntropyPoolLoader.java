@@ -29,7 +29,7 @@ import java.util.logging.Level;
 import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
 import static org.digitalmodular.entropypool.EntropyPool.MAGIC;
 import static org.digitalmodular.utilities.Verifier.requireThat;
-import static org.digitalmodular.utilities.container.DataIO.readVersion;
+import static org.digitalmodular.utilities.DataIO.readVersion;
 import org.digitalmodular.utilities.LogTimer;
 import org.digitalmodular.utilities.container.Version;
 

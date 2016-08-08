@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import static org.digitalmodular.entropypool.EntropyPool2.*;
-import static org.digitalmodular.utilities.container.DataIO.*;
+import static org.digitalmodular.utilities.DataIO.*;
 import org.digitalmodular.utilities.SecureRandomFactory;
 import org.digitalmodular.utilities.container.LoggingCount;
 import org.digitalmodular.utilities.container.LoggingVariable;

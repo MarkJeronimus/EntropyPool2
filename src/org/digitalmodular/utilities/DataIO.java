@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.digitalmodular.utilities.container;
+package org.digitalmodular.utilities;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -25,6 +25,9 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import javax.crypto.Cipher;
+import org.digitalmodular.utilities.container.LoggingCount;
+import org.digitalmodular.utilities.container.LoggingVariable;
+import org.digitalmodular.utilities.container.Version;
 
 /**
  * @author Mark Jeronimus
