@@ -26,12 +26,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
 import static org.digitalmodular.entropypool.EntropyPool.MAGIC;
 import static org.digitalmodular.utilities.Verifier.requireThat;
-import static org.digitalmodular.utilities.DataIO.readVersion;
 import org.digitalmodular.utilities.LogTimer;
 import org.digitalmodular.utilities.container.Version;
+import org.digitalmodular.utilities.io.InvalidHeaderException;
 
 /**
  * @author Mark Jeronimus
@@ -49,24 +50,21 @@ public enum EntropyPoolLoader {
 
 		LogTimer.start(Level.INFO, "Loading Entropy Pool file " + file);
 
-		EntropyPool pool;
 		try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
 			Version version = readHeader(in);
 
-			if (version == null)
-				throw new IOException("File is not an EntropyPool file: " + file);
+			EntropyPool pool = readPool(in, version);
 
-			pool = readPool(in, version);
+			Logger.getGlobal().finer("Loaded pool: " + pool.toString());
+			LogTimer.finishAndLog(Level.FINE, "Loaded the Entropy Pool in {0} seconds");
 
-			if (in.available() > 0)
-				LOGGER.warning(in.available() + " extraneous byte(s) detected");
+			return pool;
+		} catch (InvalidHeaderException ex) {
+			throw new InvalidHeaderException("File is not an EntropyPool file: " + file);
 		}
-
-		LogTimer.finishAndLog(Level.FINE, "Loaded the Entropy Pool in {0} seconds");
-		return pool;
 	}
 
-	private static Version readHeader(DataInput in) throws IOException {
+	static Version readHeader(DataInput in) throws IOException {
 		byte[] magic = new byte[MAGIC.length()];
 		in.readFully(magic);
 
@@ -74,12 +72,12 @@ public enum EntropyPoolLoader {
 
 		for (int i = 0; i < magic.length; i++)
 			if (magic[i] != (byte) MAGIC.charAt(i))
-				return null;
+				throw new InvalidHeaderException("Is not an EntropyPool");
 
 		String title = in.readUTF();
 		LOGGER.fine("title: " + title);
 
-		Version version = readVersion(in);
+		Version version = Version.readFrom(in);
 		LOGGER.fine("version: " + version);
 		return version;
 	}
@@ -88,13 +86,16 @@ public enum EntropyPoolLoader {
 		EntropyPool pool;
 
 		if (version.getMajor() == 2) {
-			pool = EntropyPool2Loader.readPool(in);
+			pool = EntropyPool2Loader.readFrom(in);
 		} else {
 			if (version.getMajor() < 2)
 				throw new IOException("Versions below 2 not supported: " + version);
 			else
 				throw new IOException("Versions above 2 not supported: " + version);
 		}
+
+		if (in.available() > 0)
+			LOGGER.warning(in.available() + " extraneous byte(s) detected");
 
 		return pool;
 	}

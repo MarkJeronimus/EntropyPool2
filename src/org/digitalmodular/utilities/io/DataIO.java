@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.digitalmodular.utilities;
+package org.digitalmodular.utilities.io;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -27,7 +27,6 @@ import java.security.SecureRandom;
 import javax.crypto.Cipher;
 import org.digitalmodular.utilities.container.LoggingCount;
 import org.digitalmodular.utilities.container.LoggingVariable;
-import org.digitalmodular.utilities.container.Version;
 
 /**
  * @author Mark Jeronimus
@@ -108,24 +107,5 @@ public enum DataIO {
 
 		LoggingVariable<T> value = new LoggingVariable<>(object, accessCount, accessDate);
 		return value;
-	}
-
-	public static void writeVersion(DataOutput out, Version version) throws IOException {
-		out.writeByte(version.getMajor());
-		out.writeByte(version.getMinor());
-		out.writeByte(version.getRelease().getValue());
-		out.writeInt(version.getRevision());
-	}
-
-	public static Version readVersion(DataInput in) throws IOException {
-		byte major        = in.readByte();
-		byte minor        = in.readByte();
-		byte releaseValue = in.readByte();
-		int  revision     = in.readInt();
-
-		Version.Release release = Version.Release.of(releaseValue);
-
-		Version version = new Version(major, minor, release, revision);
-		return version;
 	}
 }

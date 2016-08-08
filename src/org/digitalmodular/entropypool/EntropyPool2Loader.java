@@ -24,13 +24,12 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.time.Instant;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import static org.digitalmodular.entropypool.EntropyPool2.*;
-import static org.digitalmodular.utilities.DataIO.*;
+import static org.digitalmodular.utilities.io.DataIO.*;
 import org.digitalmodular.utilities.SecureRandomFactory;
 import org.digitalmodular.utilities.container.LoggingCount;
 import org.digitalmodular.utilities.container.LoggingVariable;
@@ -41,11 +40,11 @@ import org.digitalmodular.utilities.container.LoggingVariable;
  * @since 2.0
  */
 // Created 2016-08-03
-public enum EntropyPool2Loader {
+enum EntropyPool2Loader {
 	;
 
-	static EntropyPool2 readPool(DataInput in) throws IOException {
-		long         createdDate = in.readLong();
+	static EntropyPool2 readFrom(DataInput in) throws IOException {
+		long         createDate  = in.readLong();
 		LoggingCount accessCount = readLoggingCount(in);
 
 		LoggingVariable<SecureRandom>  secureRandom  = readLoggingSecureRandom(in);
@@ -61,24 +60,39 @@ public enum EntropyPool2Loader {
 
 		byte[] buffer = readByteArray(in);
 
-		EntropyPool2 pool = new EntropyPool2(createdDate, accessCount, secureRandom, messageDigest, cipher,
+		EntropyPool2 pool = new EntropyPool2(createDate, accessCount, secureRandom, messageDigest, cipher,
 		                                     injectedEntropy, extractedEntropy, mixCount, hashX, hashY, buffer);
-
-		Logger.getGlobal().finer("createdDate: " + Instant.ofEpochMilli(createdDate));
-		Logger.getGlobal().finer("bufferLength: " + buffer.length);
-		Logger.getGlobal().finer("availableEntropy: " + pool.getAvailableEntropy());
-
 		return pool;
 	}
 
 	private static LoggingVariable<SecureRandom> readLoggingSecureRandom(DataInput in) throws IOException {
-		String algorithm = in.readUTF();
+		String                        secureRandomAlgorithm = in.readUTF();
+		SecureRandom                  secureRandomInstance  = instantiateSecureRandom(secureRandomAlgorithm);
+		LoggingVariable<SecureRandom> secureRandom          = readLoggingVariable(secureRandomInstance, in);
+		return secureRandom;
+	}
 
+	private static LoggingVariable<MessageDigest> readLoggingMessageDigest(DataInput in) throws IOException {
+		String                         messageDigestAlgorithm = in.readUTF();
+		MessageDigest                  messageDigestInstance  = instantiateMessageDigest(messageDigestAlgorithm);
+		LoggingVariable<MessageDigest> messageDigest          = readLoggingVariable(messageDigestInstance, in);
+		return messageDigest;
+	}
+
+	private static LoggingVariable<Cipher> readLoggingCipher(DataInput in) throws IOException {
+		String                  cipherAlgorithm = in.readUTF();
+		Cipher                  cipherInstance  = instantiateCipher(cipherAlgorithm);
+		LoggingVariable<Cipher> cipher          = readLoggingVariable(cipherInstance, in);
+		return cipher;
+	}
+
+	private static SecureRandom instantiateSecureRandom(String secureRandomAlgorithm) throws IOException {
 		SecureRandom secureRandom;
+
 		try {
-			secureRandom = SecureRandomFactory.getInstance(algorithm);
+			secureRandom = SecureRandomFactory.getInstance(secureRandomAlgorithm);
 		} catch (NoSuchAlgorithmException ex) {
-			Logger.getGlobal().log(Level.WARNING, "SecureRandom cannot be instantiated:" + algorithm +
+			Logger.getGlobal().log(Level.WARNING, "SecureRandom cannot be instantiated:" + secureRandomAlgorithm +
 			                                      ". Using default: " + DEFAULT_SECURERANDOM_STRING, ex);
 			try {
 				secureRandom = SecureRandomFactory.getInstance(DEFAULT_SECURERANDOM_STRING);
@@ -89,18 +103,16 @@ public enum EntropyPool2Loader {
 			}
 		}
 
-		LoggingVariable<SecureRandom> loggingSecureRandom = readLoggingVariable(secureRandom, in);
-		return loggingSecureRandom;
+		return secureRandom;
 	}
 
-	private static LoggingVariable<MessageDigest> readLoggingMessageDigest(DataInput in) throws IOException {
-		String algorithm = in.readUTF();
-
+	private static MessageDigest instantiateMessageDigest(String messageDigestAlgorithm) throws IOException {
 		MessageDigest messageDigest;
+
 		try {
-			messageDigest = MessageDigest.getInstance(algorithm);
+			messageDigest = MessageDigest.getInstance(messageDigestAlgorithm);
 		} catch (NoSuchAlgorithmException ex) {
-			Logger.getGlobal().log(Level.WARNING, "MessageDigest cannot be instantiated: " + algorithm +
+			Logger.getGlobal().log(Level.WARNING, "MessageDigest cannot be instantiated: " + messageDigestAlgorithm +
 			                                      ". Using default: " + DEFAULT_MESSAGEDIGEST_STRING, ex);
 			try {
 				messageDigest = MessageDigest.getInstance(DEFAULT_MESSAGEDIGEST_STRING);
@@ -111,18 +123,16 @@ public enum EntropyPool2Loader {
 			}
 		}
 
-		LoggingVariable<MessageDigest> loggingMessageDigest = readLoggingVariable(messageDigest, in);
-		return loggingMessageDigest;
+		return messageDigest;
 	}
 
-	private static LoggingVariable<Cipher> readLoggingCipher(DataInput in) throws IOException {
-		String algorithm = in.readUTF();
-
+	private static Cipher instantiateCipher(String cipherAlgorithm) throws IOException {
 		Cipher cipher;
+
 		try {
-			cipher = Cipher.getInstance(algorithm);
+			cipher = Cipher.getInstance(cipherAlgorithm);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException ex) {
-			Logger.getGlobal().log(Level.WARNING, "Cipher cannot be instantiated: " + algorithm +
+			Logger.getGlobal().log(Level.WARNING, "Cipher cannot be instantiated: " + cipherAlgorithm +
 			                                      ". Using default: " + DEFAULT_CIPHER_STRING, ex);
 			try {
 				cipher = Cipher.getInstance(DEFAULT_CIPHER_STRING);
@@ -133,7 +143,6 @@ public enum EntropyPool2Loader {
 			}
 		}
 
-		LoggingVariable<Cipher> loggingCipher = readLoggingVariable(cipher, in);
-		return loggingCipher;
+		return cipher;
 	}
 }

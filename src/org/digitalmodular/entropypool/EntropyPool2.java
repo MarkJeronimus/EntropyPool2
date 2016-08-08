@@ -19,7 +19,14 @@
 
 package org.digitalmodular.entropypool;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -27,6 +34,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import static java.util.Objects.requireNonNull;
@@ -35,6 +43,8 @@ import org.digitalmodular.utilities.LogTimer;
 import org.digitalmodular.utilities.SecureRandomFactory;
 import org.digitalmodular.utilities.container.LoggingCount;
 import org.digitalmodular.utilities.container.LoggingVariable;
+import org.digitalmodular.utilities.container.Version;
+import org.digitalmodular.utilities.io.InvalidHeaderException;
 
 /**
  * @author Mark Jeronimus
@@ -131,28 +141,57 @@ public class EntropyPool2 implements EntropyPool {
 
 	public static EntropyPool2 loadFromFile(File poolFile) throws IOException {
 		requireThat(poolFile.exists(), "poolFile.exists() == false: " + poolFile);
+		requireThat(poolFile.isFile(), "poolFile.isFile() == false: " + poolFile);
 		requireThat(poolFile.canRead(), "poolFile.canRead() == false: " + poolFile);
 
-		EntropyPool pool = EntropyPoolLoader.loadFromFile(poolFile);
+		LogTimer.start(Level.INFO, "Loading Entropy Pool file " + poolFile);
 
-		if (!(pool instanceof EntropyPool2))
-			throw new IllegalArgumentException("File is not version 2.0. You can use" +
-			                                   " EntropyPoolLoader.loadPoolFromFile() to load any file version.");
+		try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(poolFile)))) {
+			Version version = EntropyPoolLoader.readHeader(in);
 
-		return (EntropyPool2) pool;
+			if (version.getMajor() != 2)
+				throw new IllegalArgumentException("File is not version 2: " + poolFile + ". You can use" +
+				                                   " EntropyPoolLoader.loadPoolFromFile() to load any file version.");
+
+			EntropyPool2 pool = readFrom(in);
+
+			Logger.getGlobal().finer("Loaded pool: " + pool.toString());
+			LogTimer.finishAndLog(Level.FINE, "Loaded the Entropy Pool in {0} seconds");
+
+			return pool;
+		} catch (InvalidHeaderException ex) {
+			throw new InvalidHeaderException("File is not an EntropyPool file: " + poolFile);
+		}
 	}
 
 	public void saveToFile(File poolFile, File bakFile, File tempFile) throws IOException {
 		requireNonNull(poolFile, "poolFile == null");
 		requireNonNull(bakFile, "bakFile == null");
 		requireNonNull(tempFile, "tempFile == null");
+		requireThat(!tempFile.exists() || tempFile.isFile(), "tempFile.isFile() == false: " + tempFile);
+		requireThat(!tempFile.exists() || tempFile.canWrite(), "tempFile.canWrite() == false: " + tempFile);
 
-		EntropyPool2Saver.saveToFile(this, tempFile);
+		LogTimer.start(Level.INFO, "Saving Entropy Pool file " + tempFile);
+
+		try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(tempFile)))) {
+			writeTo(out);
+		}
 
 		if (poolFile.exists())
 			Files.move(poolFile.toPath(), bakFile.toPath(), StandardCopyOption.ATOMIC_MOVE);
 
 		Files.move(tempFile.toPath(), poolFile.toPath(), StandardCopyOption.ATOMIC_MOVE);
+
+		LogTimer.finishAndLog(Level.FINE, "Saved the Entropy Pool in {0} seconds");
+	}
+
+	public static EntropyPool2 readFrom(DataInputStream in) throws IOException {
+		EntropyPool2 pool = EntropyPool2Loader.readFrom(in);
+		return pool;
+	}
+
+	public void writeTo(DataOutput out) throws IOException {
+		EntropyPool2Saver.writeTo(this, out);
 	}
 
 	public long getCreateDate()                               { return createDate; }

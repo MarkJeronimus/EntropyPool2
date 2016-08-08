@@ -19,6 +19,9 @@
 
 package org.digitalmodular.utilities.container;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import static java.util.Objects.requireNonNull;
 import static org.digitalmodular.utilities.FNV.hashFNV;
 import static org.digitalmodular.utilities.FNV.startFNV;
@@ -118,5 +121,24 @@ public class Version {
 			return String.format("%d.%d %s", major, minor, release.getReleaseName());
 		else
 			return String.format("%d.%d", major, minor);
+	}
+
+	public void writeTo(DataOutput out) throws IOException {
+		out.writeByte(major);
+		out.writeByte(minor);
+		out.writeByte(release.getValue());
+		out.writeInt(revision);
+	}
+
+	public static Version readFrom(DataInput in) throws IOException {
+		byte major        = in.readByte();
+		byte minor        = in.readByte();
+		byte releaseValue = in.readByte();
+		int  revision     = in.readInt();
+
+		Version.Release release = Version.Release.of(releaseValue);
+
+		Version version = new Version(major, minor, release, revision);
+		return version;
 	}
 }

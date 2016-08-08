@@ -19,17 +19,10 @@
 
 package org.digitalmodular.entropypool;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.DataOutput;
 import java.io.IOException;
-import java.util.logging.Level;
-import static java.util.Objects.requireNonNull;
 import static org.digitalmodular.entropypool.EntropyPool.*;
-import static org.digitalmodular.utilities.Verifier.requireThat;
-import static org.digitalmodular.utilities.DataIO.*;
-import org.digitalmodular.utilities.LogTimer;
+import static org.digitalmodular.utilities.io.DataIO.*;
 
 /**
  * @author Mark Jeronimus
@@ -37,32 +30,22 @@ import org.digitalmodular.utilities.LogTimer;
  * @since 2.0
  */
 // Created 2016-07-25
-public enum EntropyPool2Saver {
+enum EntropyPool2Saver {
 	;
 
-	public static void saveToFile(EntropyPool2 pool, File file) throws IOException {
-		requireNonNull(pool, "pool == null");
-		requireThat(!file.exists() || file.isFile(), "file.isFile() == false: " + file);
-		requireThat(!file.exists() || file.canWrite(), "file.canWrite() == false: " + file);
-
-		LogTimer.start(Level.INFO, "Saving Entropy Pool file " + file);
-
-		try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)))) {
-			writeHeader(out, pool);
-			writePool(out, pool);
-		}
-
-		LogTimer.finishAndLog(Level.FINE, "Saved the Entropy Pool in {0} seconds");
+	static void writeTo(EntropyPool2 pool, DataOutput out) throws IOException {
+		writeHeader(pool, out);
+		writePool(pool, out);
 	}
 
-	private static void writeHeader(DataOutputStream out, EntropyPool2 pool) throws IOException {
+	private static void writeHeader(EntropyPool2 pool, DataOutput out) throws IOException {
 		out.writeBytes(MAGIC);
 		out.writeUTF(PROGRAM_TITLE);
 
-		writeVersion(out, CURRENT_VERSION);
+		CURRENT_VERSION.writeTo(out);
 	}
 
-	private static void writePool(DataOutputStream out, EntropyPool2 pool) throws IOException {
+	private static void writePool(EntropyPool2 pool, DataOutput out) throws IOException {
 		out.writeLong(pool.getCreateDate());
 		writeLoggingCount(out, pool.accessCount());
 
