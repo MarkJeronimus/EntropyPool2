@@ -206,7 +206,7 @@ public class EntropyPool2 implements EntropyPool {
 			}
 		}
 
-		injectedEntropy.modify(oldValue -> Math.min(oldValue + entropyBits, buffer.length * 8));
+		injectedEntropy.set(Math.min(injectedEntropy.get() + entropyBits, buffer.length * 8));
 	}
 
 	public long getExtractedEntropy()           { return extractedEntropy.get(); }
@@ -230,7 +230,7 @@ public class EntropyPool2 implements EntropyPool {
 
 		mix();
 
-		extractedEntropy.modify(oldValue -> Math.addExact(oldValue, numBytes * 8));
+		extractedEntropy.set(Math.addExact(extractedEntropy.get(), numBytes * 8));
 
 		return bytes;
 	}

@@ -19,7 +19,6 @@
 
 package org.digitalmodular.utilities.container;
 
-import java.util.function.UnaryOperator;
 import static org.digitalmodular.utilities.Verifier.requireThat;
 
 /**
@@ -46,12 +45,6 @@ public class LoggingVariable<T> {
 
 	public void set(T value) {
 		this.value = value;
-
-		log();
-	}
-
-	public void modify(UnaryOperator<T> operator) {
-		value = operator.apply(value);
 
 		log();
 	}
