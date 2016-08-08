@@ -251,6 +251,14 @@ public class EntropyPool2 implements EntropyPool {
 		LogTimer.finishAndLog(Level.FINE, "Mixed the Entropy Pool in {0} seconds");
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("[");
+		sb.append("size=").append(buffer.length);
+		sb.append(", availableEntropy=").append(getAvailableEntropy());
+		return sb.toString();
+	}
+
 	LoggingCount accessCount()                     { return accessCount; }
 
 	LoggingVariable<SecureRandom> secureRandom()   { return secureRandom; }

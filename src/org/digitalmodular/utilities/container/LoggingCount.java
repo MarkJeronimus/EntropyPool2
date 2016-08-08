@@ -51,9 +51,9 @@ public class LoggingCount {
 
 	public long getCountDate() { return countDate; }
 
-	public String toString()   { return Integer.toString(count); }
-
 	protected void log() {
 		countDate = System.currentTimeMillis();
 	}
+
+	public String toString() { return Integer.toString(count); }
 }

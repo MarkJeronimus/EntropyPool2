@@ -55,10 +55,10 @@ public class LoggingVariable<T> {
 
 	public long getModifyDate() { return modifyDate; }
 
-	public String toString()    { return value.toString(); }
-
 	protected void log() {
 		modifyCount = Math.incrementExact(modifyCount);
 		modifyDate = System.currentTimeMillis();
 	}
+
+	public String toString() { return value.toString(); }
 }
