@@ -66,12 +66,12 @@ public enum EntropyPool2Saver {
 		out.writeLong(pool.getCreateDate());
 		writeLoggingCount(out, pool.accessCount());
 
-		writeLoggingObject(out, pool.secureRandom());
-		writeLoggingObject(out, pool.messageDigest());
-		writeLoggingObject(out, pool.cipher());
+		writeLoggingVariable(out, pool.secureRandom());
+		writeLoggingVariable(out, pool.messageDigest());
+		writeLoggingVariable(out, pool.cipher());
 
-		writeLoggingObject(out, pool.injectedEntropy());
-		writeLoggingObject(out, pool.extractedEntropy());
+		writeLoggingVariable(out, pool.injectedEntropy());
+		writeLoggingVariable(out, pool.extractedEntropy());
 		writeLoggingCount(out, pool.mixCount());
 
 		out.writeInt(pool.hashX());

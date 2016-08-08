@@ -96,7 +96,7 @@ public enum DataIO {
 		return loggingCount;
 	}
 
-	public static void writeLoggingObject(DataOutput out, LoggingVariable<?> value) throws IOException {
+	public static void writeLoggingVariable(DataOutput out, LoggingVariable<?> value) throws IOException {
 		writeObject(out, value.get());
 		out.writeInt(value.getModifyCount());
 		out.writeLong(value.getModifyDate());
