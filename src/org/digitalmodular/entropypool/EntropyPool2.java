@@ -253,7 +253,7 @@ public class EntropyPool2 implements EntropyPool {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("[");
+		StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
 		sb.append("size=").append(buffer.length);
 		sb.append(", availableEntropy=").append(getAvailableEntropy());
 		return sb.toString();
