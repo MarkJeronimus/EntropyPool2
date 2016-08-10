@@ -26,10 +26,9 @@ import java.util.logging.Logger;
 import org.digitalmodular.utilities.LogTimer;
 import org.digitalmodular.utilities.container.Version;
 import org.digitalmodular.utilities.io.InvalidHeaderException;
-
-import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
-import static org.digitalmodular.entropypool.EntropyPool.MAGIC;
 import static org.digitalmodular.utilities.Verifier.requireThat;
+
+import static org.digitalmodular.entropypool.EntropyPool.MAGIC;
 
 /**
  * @author Mark Jeronimus
@@ -52,7 +51,7 @@ public enum EntropyPoolLoader {
 
 			EntropyPool pool = readPool(in, version);
 
-			if (LOGGER.isLoggable(Level.FINE))
+			if (Logger.getGlobal().isLoggable(Level.FINE))
 				Logger.getGlobal().finer("Loaded pool: " + pool);
 			LogTimer.finishAndLog(Level.FINE, "Loaded the Entropy Pool in {0} seconds");
 
@@ -66,20 +65,17 @@ public enum EntropyPoolLoader {
 		byte[] magic = new byte[MAGIC.length()];
 		in.readFully(magic);
 
-		if (LOGGER.isLoggable(Level.FINE))
-			LOGGER.fine("magic: " + new String(magic, "UTF-8"));
+		if (Logger.getGlobal().isLoggable(Level.FINE)) Logger.getGlobal().fine("magic: " + new String(magic, "UTF-8"));
 
 		for (int i = 0; i < magic.length; i++)
 			if (magic[i] != (byte)MAGIC.charAt(i))
 				throw new InvalidHeaderException("Is not an EntropyPool");
 
 		String title = in.readUTF();
-		if (LOGGER.isLoggable(Level.FINE))
-			LOGGER.fine("title: " + title);
+		if (Logger.getGlobal().isLoggable(Level.FINE)) Logger.getGlobal().fine("title: " + title);
 
 		Version version = Version.readFrom(in);
-		if (LOGGER.isLoggable(Level.FINE))
-			LOGGER.fine("version: " + version);
+		if (Logger.getGlobal().isLoggable(Level.FINE)) Logger.getGlobal().fine("version: " + version);
 		return version;
 	}
 
@@ -96,7 +92,7 @@ public enum EntropyPoolLoader {
 		}
 
 		if (in.available() > 0)
-			LOGGER.warning(in.available() + " extraneous byte(s) detected");
+			Logger.getGlobal().warning(in.available() + " extraneous byte(s) detected");
 
 		return pool;
 	}
