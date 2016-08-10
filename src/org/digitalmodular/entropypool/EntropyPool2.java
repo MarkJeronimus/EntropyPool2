@@ -27,6 +27,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.Objects.requireNonNull;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
@@ -36,8 +37,6 @@ import org.digitalmodular.utilities.container.LoggingCount;
 import org.digitalmodular.utilities.container.LoggingVariable;
 import org.digitalmodular.utilities.container.Version;
 import org.digitalmodular.utilities.io.InvalidHeaderException;
-
-import static java.util.Objects.requireNonNull;
 import static org.digitalmodular.utilities.Verifier.requireThat;
 
 /**

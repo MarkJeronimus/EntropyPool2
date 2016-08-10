@@ -32,9 +32,9 @@ import javax.crypto.NoSuchPaddingException;
 import org.digitalmodular.utilities.SecureRandomFactory;
 import org.digitalmodular.utilities.container.LoggingCount;
 import org.digitalmodular.utilities.container.LoggingVariable;
+import static org.digitalmodular.utilities.io.DataIO.*;
 
 import static org.digitalmodular.entropypool.EntropyPool2.*;
-import static org.digitalmodular.utilities.io.DataIO.*;
 
 /**
  * @author Mark Jeronimus

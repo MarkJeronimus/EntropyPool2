@@ -21,10 +21,9 @@ package org.digitalmodular.entropypool;
 
 import java.io.*;
 import java.util.logging.Level;
+import static java.util.Objects.requireNonNull;
 
 import org.digitalmodular.utilities.LogTimer;
-
-import static java.util.Objects.requireNonNull;
 import static org.digitalmodular.utilities.Verifier.requireThat;
 
 /**

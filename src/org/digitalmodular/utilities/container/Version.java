@@ -22,8 +22,8 @@ package org.digitalmodular.utilities.container;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-
 import static java.util.Objects.requireNonNull;
+
 import static org.digitalmodular.utilities.FNV.hashFNV;
 import static org.digitalmodular.utilities.FNV.startFNV;
 import static org.digitalmodular.utilities.Verifier.requireThat;

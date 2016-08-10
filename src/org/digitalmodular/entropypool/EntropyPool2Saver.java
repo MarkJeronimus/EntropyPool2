@@ -22,8 +22,9 @@ package org.digitalmodular.entropypool;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import static org.digitalmodular.entropypool.EntropyPool.*;
 import static org.digitalmodular.utilities.io.DataIO.*;
+
+import static org.digitalmodular.entropypool.EntropyPool.*;
 
 /**
  * @author Mark Jeronimus

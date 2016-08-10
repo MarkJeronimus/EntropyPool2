@@ -23,7 +23,6 @@ import java.security.MessageDigest;
 import java.util.logging.Level;
 
 import org.digitalmodular.utilities.LogTimer;
-
 import static org.digitalmodular.utilities.container.MessageDigestUtilities.*;
 
 /**
