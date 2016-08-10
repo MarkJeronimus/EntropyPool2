@@ -47,7 +47,7 @@ public enum LogTimer {
 	}
 
 	public static void start(Level level, String message) {
-		Logger.getGlobal().log(level, message);
+		if (Logger.getGlobal().isLoggable(level)) Logger.getGlobal().log(level, message);
 
 		start();
 	}
