@@ -19,6 +19,8 @@
 
 package org.digitalmodular.utilities;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.logging.Level;
@@ -28,11 +30,13 @@ import java.util.logging.Logger;
  * @author Mark Jeronimus
  */
 // Created 2016-08-03
-public class LogTimer {
+public enum LogTimer {
+	;
+
 	private static final ThreadLocal<Deque<Long>> THREAD_LOCAL = new ThreadLocal<Deque<Long>>() {
 		@Override
 		protected Deque<Long> initialValue() {
-			return new ArrayDeque<>();
+			return new ArrayDeque<>(4);
 		}
 	};
 
@@ -49,11 +53,13 @@ public class LogTimer {
 	}
 
 	public static void finishAndLog(Level level, String template) {
+		if (!Logger.getGlobal().isLoggable(level)) return;
+
 		Deque<Long> stack = THREAD_LOCAL.get();
 
 		if (stack.isEmpty()) throw new IllegalStateException("Not started");
 
 		long elapsed = System.nanoTime() - stack.pop();
-		Logger.getGlobal().log(level, template, elapsed / 1e9);
+		Logger.getGlobal().log(level, template, Duration.of(elapsed, ChronoUnit.NANOS));
 	}
 }

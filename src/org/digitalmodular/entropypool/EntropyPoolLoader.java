@@ -19,20 +19,17 @@
 
 package org.digitalmodular.entropypool;
 
-import java.io.BufferedInputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
-import static org.digitalmodular.entropypool.EntropyPool.MAGIC;
-import static org.digitalmodular.utilities.Verifier.requireThat;
+
 import org.digitalmodular.utilities.LogTimer;
 import org.digitalmodular.utilities.container.Version;
 import org.digitalmodular.utilities.io.InvalidHeaderException;
+
+import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
+import static org.digitalmodular.entropypool.EntropyPool.MAGIC;
+import static org.digitalmodular.utilities.Verifier.requireThat;
 
 /**
  * @author Mark Jeronimus
@@ -55,11 +52,12 @@ public enum EntropyPoolLoader {
 
 			EntropyPool pool = readPool(in, version);
 
-			Logger.getGlobal().finer("Loaded pool: " + pool.toString());
+			if (LOGGER.isLoggable(Level.FINE))
+				Logger.getGlobal().finer("Loaded pool: " + pool);
 			LogTimer.finishAndLog(Level.FINE, "Loaded the Entropy Pool in {0} seconds");
 
 			return pool;
-		} catch (InvalidHeaderException ex) {
+		} catch (InvalidHeaderException ignored) {
 			throw new InvalidHeaderException("File is not an EntropyPool file: " + file);
 		}
 	}
@@ -68,17 +66,20 @@ public enum EntropyPoolLoader {
 		byte[] magic = new byte[MAGIC.length()];
 		in.readFully(magic);
 
-		LOGGER.fine("magic: " + new String(magic, "UTF-8"));
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.fine("magic: " + new String(magic, "UTF-8"));
 
 		for (int i = 0; i < magic.length; i++)
-			if (magic[i] != (byte) MAGIC.charAt(i))
+			if (magic[i] != (byte)MAGIC.charAt(i))
 				throw new InvalidHeaderException("Is not an EntropyPool");
 
 		String title = in.readUTF();
-		LOGGER.fine("title: " + title);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.fine("title: " + title);
 
 		Version version = Version.readFrom(in);
-		LOGGER.fine("version: " + version);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.fine("version: " + version);
 		return version;
 	}
 

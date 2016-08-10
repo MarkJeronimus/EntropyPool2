@@ -21,8 +21,10 @@ package org.digitalmodular.entropypool;
 
 import java.security.MessageDigest;
 import java.util.logging.Level;
-import static org.digitalmodular.utilities.MessageDigestUtilities.*;
+
 import org.digitalmodular.utilities.LogTimer;
+
+import static org.digitalmodular.utilities.container.MessageDigestUtilities.*;
 
 /**
  * @author Mark Jeronimus
@@ -31,7 +33,7 @@ import org.digitalmodular.utilities.LogTimer;
  */
 // Created 2016-08-02
 public class RehashMixer implements EntropyPoolMixer {
-	private byte[] digestBuffer = null;
+	private byte[] digestBuffer;
 
 	@Override
 	public void mix(EntropyPool2 pool) {

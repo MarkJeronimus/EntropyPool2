@@ -21,6 +21,7 @@ package org.digitalmodular.entropypool;
 
 import java.io.DataOutput;
 import java.io.IOException;
+
 import static org.digitalmodular.entropypool.EntropyPool.*;
 import static org.digitalmodular.utilities.io.DataIO.*;
 
@@ -34,11 +35,11 @@ enum EntropyPool2Saver {
 	;
 
 	static void writeTo(EntropyPool2 pool, DataOutput out) throws IOException {
-		writeHeader(pool, out);
+		writeHeader(out);
 		writePool(pool, out);
 	}
 
-	private static void writeHeader(EntropyPool2 pool, DataOutput out) throws IOException {
+	private static void writeHeader(DataOutput out) throws IOException {
 		out.writeBytes(MAGIC);
 		out.writeUTF(PROGRAM_TITLE);
 

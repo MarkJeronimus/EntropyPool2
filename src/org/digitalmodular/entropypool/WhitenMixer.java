@@ -21,6 +21,7 @@ package org.digitalmodular.entropypool;
 
 import java.security.SecureRandom;
 import java.util.logging.Level;
+
 import org.digitalmodular.utilities.LogTimer;
 
 /**
@@ -38,7 +39,7 @@ public class WhitenMixer implements EntropyPoolMixer {
 		byte[]       buffer = pool.buffer();
 
 		for (int i = 0; i < buffer.length; i++)
-			buffer[i] ^= (byte) random.nextInt(0x100);
+			buffer[i] ^= (byte)random.nextInt(0x100);
 
 		LogTimer.finishAndLog(Level.FINER, "Whitened the Entropy Pool in {0} seconds");
 	}

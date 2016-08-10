@@ -23,6 +23,7 @@ package org.digitalmodular.utilities;
  * @author Mark Jeronimus
  */
 // Created 2016-07-25
+@SuppressWarnings("BooleanParameter")
 public enum Verifier {
 	;
 

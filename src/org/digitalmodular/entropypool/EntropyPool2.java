@@ -19,15 +19,7 @@
 
 package org.digitalmodular.entropypool;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
@@ -37,14 +29,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
-import static java.util.Objects.requireNonNull;
-import static org.digitalmodular.utilities.Verifier.requireThat;
+
 import org.digitalmodular.utilities.LogTimer;
 import org.digitalmodular.utilities.SecureRandomFactory;
 import org.digitalmodular.utilities.container.LoggingCount;
 import org.digitalmodular.utilities.container.LoggingVariable;
 import org.digitalmodular.utilities.container.Version;
 import org.digitalmodular.utilities.io.InvalidHeaderException;
+
+import static java.util.Objects.requireNonNull;
+import static org.digitalmodular.utilities.Verifier.requireThat;
 
 /**
  * @author Mark Jeronimus
@@ -76,7 +70,7 @@ public class EntropyPool2 implements EntropyPool {
 
 	private final byte[] buffer;
 
-	private transient int writePointer = 0;
+	private transient int writePointer;
 
 	private final EntropyPoolMixer mixer = new MultipleMixer(
 			new WhitenMixer(),
@@ -103,10 +97,11 @@ public class EntropyPool2 implements EntropyPool {
 		buffer = new byte[size];
 	}
 
-	public EntropyPool2(long createDate, LoggingCount accessCount, LoggingVariable<SecureRandom> secureRandom,
-	                    LoggingVariable<MessageDigest> messageDigest, LoggingVariable<Cipher> cipher,
-	                    LoggingVariable<Long> injectedEntropy, LoggingVariable<Long> extractedEntropy,
-	                    LoggingCount mixCount, int hashX, int hashY, byte[] buffer) {
+	@SuppressWarnings("AssignmentToCollectionOrArrayFieldFromParameter")
+	EntropyPool2(long createDate, LoggingCount accessCount, LoggingVariable<SecureRandom> secureRandom,
+	             LoggingVariable<MessageDigest> messageDigest, LoggingVariable<Cipher> cipher,
+	             LoggingVariable<Long> injectedEntropy, LoggingVariable<Long> extractedEntropy,
+	             LoggingCount mixCount, int hashX, int hashY, byte[] buffer) {
 		requireNonNull(accessCount, "accessCount == null");
 		requireNonNull(secureRandom, "secureRandom == null");
 		requireNonNull(messageDigest, "messageDigest == null");
@@ -155,11 +150,13 @@ public class EntropyPool2 implements EntropyPool {
 
 			EntropyPool2 pool = readFrom(in);
 
-			Logger.getGlobal().finer("Loaded pool: " + pool.toString());
+			if (Logger.getGlobal().isLoggable(Level.FINER))
+				Logger.getGlobal().finer("Loaded pool: " + pool);
+
 			LogTimer.finishAndLog(Level.FINE, "Loaded the Entropy Pool in {0} seconds");
 
 			return pool;
-		} catch (InvalidHeaderException ex) {
+		} catch (InvalidHeaderException ignored) {
 			throw new InvalidHeaderException("File is not an EntropyPool file: " + poolFile);
 		}
 	}
@@ -185,7 +182,7 @@ public class EntropyPool2 implements EntropyPool {
 		LogTimer.finishAndLog(Level.FINE, "Saved the Entropy Pool in {0} seconds");
 	}
 
-	public static EntropyPool2 readFrom(DataInputStream in) throws IOException {
+	public static EntropyPool2 readFrom(DataInput in) throws IOException {
 		EntropyPool2 pool = EntropyPool2Loader.readFrom(in);
 		return pool;
 	}
@@ -226,18 +223,26 @@ public class EntropyPool2 implements EntropyPool {
 
 	public void setCipher(Cipher cipher)                      { this.cipher.set(cipher); }
 
-	public long getInjectedEntropy()                          { return injectedEntropy.get(); }
+	@Override
+	public long getInjectedEntropy() { return injectedEntropy.get(); }
 
-	public int getInjectedEntropyModifyCount()                { return injectedEntropy.getModifyCount(); }
+	public int getInjectedEntropyModifyCount() { return injectedEntropy.getModifyCount(); }
 
-	public long getInjectedEntropyModifyDate()                { return injectedEntropy.getModifyDate(); }
+	public long getInjectedEntropyModifyDate() { return injectedEntropy.getModifyDate(); }
+
+	public void injectEntropyFromFileOrDirectory(File fileOrDirectory) throws IOException {
+		requireThat(fileOrDirectory.exists(), "fileOrDirectory doesn't exist: " + fileOrDirectory);
+
+		EntropyPoolInjector.injectEntropyFromFileOrDirectory(this, fileOrDirectory);
+	}
 
 	@Override
 	public void injectEntropy(byte[] bytes, int entropyBits) {
 		requireThat(bytes.length > 0, "bytes.length == 0");
 
 		for (byte b : bytes) {
-			buffer[writePointer++] ^= b;
+			buffer[writePointer] ^= b;
+			writePointer++;
 
 			if (writePointer == buffer.length) {
 				writePointer = 0;
@@ -245,10 +250,11 @@ public class EntropyPool2 implements EntropyPool {
 			}
 		}
 
-		injectedEntropy.set(Math.min(injectedEntropy.get() + entropyBits, buffer.length * 8));
+		injectedEntropy.set(Math.min(injectedEntropy.get() + entropyBits, buffer.length * 8L));
 	}
 
-	public long getExtractedEntropy()           { return extractedEntropy.get(); }
+	@Override
+	public long getExtractedEntropy() { return extractedEntropy.get(); }
 
 	public int getExtractedEntropyModifyCount() { return extractedEntropy.getModifyCount(); }
 
@@ -269,7 +275,7 @@ public class EntropyPool2 implements EntropyPool {
 
 		mix();
 
-		extractedEntropy.set(Math.addExact(extractedEntropy.get(), numBytes * 8));
+		extractedEntropy.set(Math.addExact(extractedEntropy.get(), numBytes * 8L));
 
 		return bytes;
 	}
@@ -320,6 +326,7 @@ public class EntropyPool2 implements EntropyPool {
 
 	void hashY(int hashY)                          { this.hashY = hashY; }
 
-	byte[] buffer()                                { return buffer; }
+	@SuppressWarnings("ReturnOfCollectionOrArrayField")
+	byte[] buffer() { return buffer; }
 }
 

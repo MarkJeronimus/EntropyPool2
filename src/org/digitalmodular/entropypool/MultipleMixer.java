@@ -29,7 +29,7 @@ import java.util.List;
  */
 // Created 2016-08-02
 public class MultipleMixer implements EntropyPoolMixer {
-	private List<EntropyPoolMixer> mixers;
+	private final List<EntropyPoolMixer> mixers;
 
 	public MultipleMixer(EntropyPoolMixer... mixers) {
 		this.mixers = Arrays.asList(mixers);

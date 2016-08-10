@@ -7,9 +7,11 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.digitalmodular.entropypool.EntropyPool2;
+
 import org.digitalmodular.utilities.LoggerUtilities;
+import org.digitalmodular.entropypool.EntropyPool2;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * @author Mark Jeronimus
@@ -17,6 +19,7 @@ import org.digitalmodular.utilities.LoggerUtilities;
  * @since 2.0
  */
 // Created 2016-07-29
+@SuppressWarnings("ALL")
 public class EntropyPoolExtractExampleMain {
 	private static final File ENTROPY_POOL_FILE      = new File("r:\\entropypool.bin");
 	private static final File ENTROPY_POOL_FILE_BAK  = new File("r:\\entropypool.bak");
@@ -27,7 +30,7 @@ public class EntropyPoolExtractExampleMain {
 		LoggerUtilities.configure(Level.ALL);
 	}
 
-	public static void main(String[] args) {
+	public static void main(String... args) {
 		SwingUtilities.invokeLater(EntropyPoolExtractExampleMain::new);
 	}
 
@@ -39,8 +42,8 @@ public class EntropyPoolExtractExampleMain {
 			pool.incrementAccessCount();
 
 			byte[] entropy = pool.extractEntropy(1600);
-			System.out.println("Extracted entropy: " + Arrays.toString(entropy));
-			System.out.println("Available entropy: " + pool.getAvailableEntropy());
+			Logger.getGlobal().info("Extracted entropy: " + Arrays.toString(entropy));
+			Logger.getGlobal().info("Available entropy: " + pool.getAvailableEntropy());
 
 			pool.saveToFile(ENTROPY_POOL_FILE, ENTROPY_POOL_FILE_BAK, ENTROPY_POOL_FILE_TEMP);
 		} catch (IOException ex) {

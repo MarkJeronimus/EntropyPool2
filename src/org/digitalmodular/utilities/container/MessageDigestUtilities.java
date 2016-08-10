@@ -17,17 +17,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.digitalmodular.utilities;
+package org.digitalmodular.utilities.container;
 
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import javax.crypto.Cipher;
+
 import static org.digitalmodular.utilities.ArrayUtilities.getLengthAfterWrap;
 import static org.digitalmodular.utilities.ArrayUtilities.getLengthBeforeWrap;
-import org.digitalmodular.utilities.container.LoggingCount;
-import org.digitalmodular.utilities.container.LoggingVariable;
 
 /**
  * @author Mark Jeronimus
@@ -41,33 +40,33 @@ public enum MessageDigestUtilities {
 	}
 
 	public static void hashShort(MessageDigest digest, short value) {
-		digest.update((byte) (value >>> 8));
-		digest.update((byte) value);
+		digest.update((byte)(value >>> 8));
+		digest.update((byte)value);
 	}
 
 	public static void hashInt(MessageDigest digest, int value) {
-		digest.update((byte) (value >>> 24));
-		digest.update((byte) (value >>> 16));
-		digest.update((byte) (value >>> 8));
-		digest.update((byte) value);
+		digest.update((byte)(value >>> 24));
+		digest.update((byte)(value >>> 16));
+		digest.update((byte)(value >>> 8));
+		digest.update((byte)value);
 	}
 
 	public static void hashLong(MessageDigest digest, long value) {
-		digest.update((byte) (value >>> 56));
-		digest.update((byte) (value >>> 48));
-		digest.update((byte) (value >>> 40));
-		digest.update((byte) (value >>> 32));
-		digest.update((byte) (value >>> 24));
-		digest.update((byte) (value >>> 16));
-		digest.update((byte) (value >>> 8));
-		digest.update((byte) value);
+		digest.update((byte)(value >>> 56));
+		digest.update((byte)(value >>> 48));
+		digest.update((byte)(value >>> 40));
+		digest.update((byte)(value >>> 32));
+		digest.update((byte)(value >>> 24));
+		digest.update((byte)(value >>> 16));
+		digest.update((byte)(value >>> 8));
+		digest.update((byte)value);
 	}
 
 	public static void hashChar(MessageDigest digest, char value) {
-		digest.update((byte) (value >>> 24));
-		digest.update((byte) (value >>> 16));
-		digest.update((byte) (value >>> 8));
-		digest.update((byte) value);
+		digest.update((byte)(value >>> 24));
+		digest.update((byte)(value >>> 16));
+		digest.update((byte)(value >>> 8));
+		digest.update((byte)value);
 	}
 
 	public static void hashFloat(MessageDigest digest, float value) {
@@ -83,36 +82,36 @@ public enum MessageDigestUtilities {
 			hashByte(digest, b);
 	}
 
-	public static void hashString(MessageDigest digest, String value) {
+	public static void hashCharSequence(MessageDigest digest, CharSequence value) {
 		for (int i = 0; i < value.length(); i++)
 			hashChar(digest, value.charAt(i));
 	}
 
 	private static void hashObject(MessageDigest digest, Object value) {
 		if (value instanceof Byte)
-			hashByte(digest, (Byte) value);
+			hashByte(digest, (Byte)value);
 		else if (value instanceof Short)
-			hashShort(digest, (Short) value);
+			hashShort(digest, (Short)value);
 		else if (value instanceof Integer)
-			hashInt(digest, (Integer) value);
+			hashInt(digest, (Integer)value);
 		else if (value instanceof Long)
-			hashLong(digest, (Long) value);
+			hashLong(digest, (Long)value);
 		else if (value instanceof Character)
-			hashChar(digest, (Character) value);
+			hashChar(digest, (Character)value);
 		else if (value instanceof Float)
-			hashFloat(digest, (Float) value);
+			hashFloat(digest, (Float)value);
 		else if (value instanceof Double)
-			hashDouble(digest, (Double) value);
+			hashDouble(digest, (Double)value);
 		else if (value instanceof byte[])
-			hashBytes(digest, (byte[]) value);
-		else if (value instanceof String)
-			hashString(digest, (String) value);
+			hashBytes(digest, (byte[])value);
+		else if (value instanceof CharSequence)
+			hashCharSequence(digest, (CharSequence)value);
 		else if (value instanceof SecureRandom)
-			hashString(digest, ((SecureRandom) value).getAlgorithm());
+			hashCharSequence(digest, ((SecureRandom)value).getAlgorithm());
 		else if (value instanceof MessageDigest)
-			hashString(digest, ((MessageDigest) value).getAlgorithm());
+			hashCharSequence(digest, ((MessageDigest)value).getAlgorithm());
 		else if (value instanceof Cipher)
-			hashString(digest, ((Cipher) value).getAlgorithm());
+			hashCharSequence(digest, ((Cipher)value).getAlgorithm());
 		else
 			throw new IllegalArgumentException("Hashing " + value.getClass() + " not yet supported");
 	}
@@ -150,7 +149,7 @@ public enum MessageDigestUtilities {
 			System.arraycopy(digestBuffer, 0, buffer, byteOffset, lengthBeforeWrap);
 			System.arraycopy(digestBuffer, lengthBeforeWrap, buffer, 0, lengthAfterWrap);
 
-			Arrays.fill(digestBuffer, (byte) 0);
+			Arrays.fill(digestBuffer, (byte)0);
 		} catch (DigestException ex) {
 			throw new InternalError("This shouldn't happen", ex);
 		}

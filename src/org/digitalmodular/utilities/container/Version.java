@@ -22,6 +22,7 @@ package org.digitalmodular.utilities.container;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+
 import static java.util.Objects.requireNonNull;
 import static org.digitalmodular.utilities.FNV.hashFNV;
 import static org.digitalmodular.utilities.FNV.startFNV;
@@ -44,7 +45,7 @@ public class Version {
 		private final String releaseName;
 
 		Release(int value, String releaseName) {
-			this.value = (byte) value;
+			this.value = (byte)value;
 			this.releaseName = releaseName;
 		}
 
@@ -71,10 +72,10 @@ public class Version {
 		requireNonNull(release, "release == null");
 		requireThat(revision >= 1, "revision not in range [1,Integer.MAX_VALUE]: " + revision);
 
-		this.major = (byte) major;
-		this.minor = (byte) minor;
+		this.major = (byte)major;
+		this.minor = (byte)minor;
 		this.release = release;
-		this.revision = (short) revision;
+		this.revision = (short)revision;
 	}
 
 	public byte getMinor()      { return minor; }
@@ -90,12 +91,12 @@ public class Version {
 		if (this == o) return true;
 		if (!(o instanceof Version)) return false;
 
-		Version version = (Version) o;
+		Version version = (Version)o;
 
-		return (getMinor() == version.getMinor() &&
-		        getMajor() == version.getMajor() &&
-		        getRelease() == version.getRelease() &&
-		        getRevision() == version.getRevision());
+		return getMinor() == version.getMinor() &&
+		       getMajor() == version.getMajor() &&
+		       getRelease() == version.getRelease() &&
+		       getRevision() == version.getRevision();
 	}
 
 	@Override
@@ -110,17 +111,17 @@ public class Version {
 
 	@Override
 	public String toString() {
-		if (release != Release.STABLE)
-			return String.format("%d.%d %s (r%d)", major, minor, release.getReleaseName(), revision);
-		else
+		if (release == Release.STABLE)
 			return String.format("%d.%d (r%d)", major, minor, revision);
+		else
+			return String.format("%d.%d %s (r%d)", major, minor, release.getReleaseName(), revision);
 	}
 
 	public String toShortString() {
-		if (release != Release.STABLE)
-			return String.format("%d.%d %s", major, minor, release.getReleaseName());
-		else
+		if (release == Release.STABLE)
 			return String.format("%d.%d", major, minor);
+		else
+			return String.format("%d.%d %s", major, minor, release.getReleaseName());
 	}
 
 	public void writeTo(DataOutput out) throws IOException {

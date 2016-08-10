@@ -9,10 +9,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.SwingUtilities;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.digitalmodular.entropypool.EntropyPool2;
+
 import org.digitalmodular.utilities.LoggerUtilities;
 import org.digitalmodular.utilities.swing.ShowFileChooserAction;
+import org.digitalmodular.entropypool.EntropyPool2;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * @author Mark Jeronimus
@@ -20,6 +22,7 @@ import org.digitalmodular.utilities.swing.ShowFileChooserAction;
  * @since 2.0
  */
 // Created 2016-07-29
+@SuppressWarnings("ALL")
 public class EntropyPoolInjectExampleMain {
 	private static final File ENTROPY_POOL_FILE      = new File("r:\\entropypool.bin");
 	private static final File ENTROPY_POOL_FILE_BAK  = new File("r:\\entropypool.bak");
@@ -30,7 +33,7 @@ public class EntropyPoolInjectExampleMain {
 		LoggerUtilities.configure(Level.ALL);
 	}
 
-	public static void main(String[] args) {
+	public static void main(String... args) {
 		SwingUtilities.invokeLater(EntropyPoolInjectExampleMain::new);
 	}
 

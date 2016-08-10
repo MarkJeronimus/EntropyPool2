@@ -49,10 +49,11 @@ import java.math.BigInteger;
  * @since 1.0
  */
 // Created 2016-08-07
-public class Coprimeness {
+@SuppressWarnings("ALL")
+public final class Coprimeness {
 	public static final boolean DEBUG = true;
 
-	public static void main(String[] args) {
+	public static void main(String... args) {
 		if (DEBUG) {
 			testCase(13);
 		} else {
@@ -61,22 +62,22 @@ public class Coprimeness {
 
 			int from = 65536 - fieldLength - 14;
 			int to   = 65536 - fieldLength;
-			System.out.println("[" + from + "," + to + ")");
+			System.out.println("[" + from + ',' + to + ')');
 			for (int bufferLength = from; bufferLength <= to; bufferLength += 2)
 				analyze(bufferLength, digestLength);
 		}
 	}
 
 	private static void testCase(int n) {
-		for (int d = 3; d <= n / 2; d += (2 - n % 2))
+		for (int d = 3; d <= n / 2; d += 2 - n % 2)
 			analyze(n, d);
 	}
 
 	private static void analyze(int n, int d) {
-		boolean[] map = new boolean[n];
-
 		// Must be coprime first.
 		if (!BigInteger.valueOf(n).gcd(BigInteger.valueOf(d)).equals(BigInteger.ONE)) return;
+
+		boolean[] map = new boolean[n];
 
 		int coprimeness = 0;
 
@@ -98,7 +99,7 @@ public class Coprimeness {
 			coprimeness += smallestGap;
 		}
 
-		System.out.println("{" + n + "/" + d + "} coprimeness = " + coprimeness);
+		System.out.println("{" + n + '/' + d + "} coprimeness = " + coprimeness);
 	}
 
 	private static int findSmallestGap(boolean[] map) {

@@ -25,6 +25,7 @@ package org.digitalmodular.entropypool;
  * @since 2.0
  */
 // Created 2016-08-02
+@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface EntropyPoolMixer {
 	void mix(EntropyPool2 pool);
 }

@@ -121,7 +121,7 @@ public enum ArrayUtilities {
 		}
 
 		if (array.length > arrayLength) {
-			throw new IllegalArgumentException("String has more than " + array + " bytes: " + array.length +
+			throw new IllegalArgumentException("String has more than " + arrayLength + " bytes: " + array.length +
 			                                   ". How many characters that is depends on UTF-8.");
 		}
 

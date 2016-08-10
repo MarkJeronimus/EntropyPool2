@@ -19,15 +19,13 @@
 
 package org.digitalmodular.entropypool;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.logging.Level;
+
+import org.digitalmodular.utilities.LogTimer;
+
 import static java.util.Objects.requireNonNull;
 import static org.digitalmodular.utilities.Verifier.requireThat;
-import org.digitalmodular.utilities.LogTimer;
 
 /**
  * @author Mark Jeronimus
@@ -56,7 +54,11 @@ public enum EntropyPoolInjector {
 		requireNonNull(pool, "pool == null");
 		requireThat(directory.exists(), "directory.exists() == false: " + directory);
 
-		for (File file : directory.listFiles())
+		File[] files = directory.listFiles();
+		if (files == null)
+			throw new IOException("Directory unreadable:" + directory);
+
+		for (File file : files)
 			injectEntropyFromFileOrDirectory(pool, file);
 	}
 
@@ -69,12 +71,11 @@ public enum EntropyPoolInjector {
 
 		long remaining = file.length();
 
-		byte[] bytesForPool = null;
-
 		try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+			byte[] bytesForPool = null;
 			while (remaining > 0) {
 
-				int size = remaining > MAX_READ_ARRAY_LENGTH ? MAX_READ_ARRAY_LENGTH : (int) remaining;
+				int size = remaining > MAX_READ_ARRAY_LENGTH ? MAX_READ_ARRAY_LENGTH : (int)remaining;
 
 				if (bytesForPool == null || bytesForPool.length != size) bytesForPool = new byte[size];
 

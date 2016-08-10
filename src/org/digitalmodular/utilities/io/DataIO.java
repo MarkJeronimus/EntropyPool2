@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import javax.crypto.Cipher;
+
 import org.digitalmodular.utilities.container.LoggingCount;
 import org.digitalmodular.utilities.container.LoggingVariable;
 
@@ -37,29 +38,29 @@ public enum DataIO {
 
 	public static void writeObject(DataOutput out, Object value) throws IOException {
 		if (value instanceof Byte)
-			out.writeByte((Byte) value);
+			out.writeByte((Byte)value);
 		else if (value instanceof Short)
-			out.writeShort((Short) value);
+			out.writeShort((Short)value);
 		else if (value instanceof Integer)
-			out.writeInt((Integer) value);
+			out.writeInt((Integer)value);
 		else if (value instanceof Long)
-			out.writeLong((Long) value);
+			out.writeLong((Long)value);
 		else if (value instanceof Float)
-			out.writeFloat((Float) value);
+			out.writeFloat((Float)value);
 		else if (value instanceof Double)
-			out.writeDouble((Double) value);
+			out.writeDouble((Double)value);
 		else if (value instanceof Character)
-			out.writeChar((Character) value);
+			out.writeChar((Character)value);
 		else if (value instanceof byte[])
-			out.write((byte[]) value);
+			out.write((byte[])value);
 		else if (value instanceof String)
-			out.writeUTF((String) value);
+			out.writeUTF((String)value);
 		else if (value instanceof SecureRandom)
-			out.writeUTF(((SecureRandom) value).getAlgorithm());
+			out.writeUTF(((SecureRandom)value).getAlgorithm());
 		else if (value instanceof MessageDigest)
-			out.writeUTF(((MessageDigest) value).getAlgorithm());
+			out.writeUTF(((MessageDigest)value).getAlgorithm());
 		else if (value instanceof Cipher)
-			out.writeUTF(((Cipher) value).getAlgorithm());
+			out.writeUTF(((Cipher)value).getAlgorithm());
 		else
 			throw new IllegalArgumentException("Serializing " + value.getClass().getName() + " not yet supported");
 	}

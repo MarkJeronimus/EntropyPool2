@@ -28,11 +28,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
-import static org.digitalmodular.entropypool.EntropyPool2.*;
-import static org.digitalmodular.utilities.io.DataIO.*;
+
 import org.digitalmodular.utilities.SecureRandomFactory;
 import org.digitalmodular.utilities.container.LoggingCount;
 import org.digitalmodular.utilities.container.LoggingVariable;
+
+import static org.digitalmodular.entropypool.EntropyPool2.*;
+import static org.digitalmodular.utilities.io.DataIO.*;
 
 /**
  * @author Mark Jeronimus
@@ -86,7 +88,7 @@ enum EntropyPool2Loader {
 		return cipher;
 	}
 
-	private static SecureRandom instantiateSecureRandom(String secureRandomAlgorithm) throws IOException {
+	private static SecureRandom instantiateSecureRandom(String secureRandomAlgorithm) {
 		SecureRandom secureRandom;
 
 		try {
@@ -106,7 +108,7 @@ enum EntropyPool2Loader {
 		return secureRandom;
 	}
 
-	private static MessageDigest instantiateMessageDigest(String messageDigestAlgorithm) throws IOException {
+	private static MessageDigest instantiateMessageDigest(String messageDigestAlgorithm) {
 		MessageDigest messageDigest;
 
 		try {
@@ -126,7 +128,7 @@ enum EntropyPool2Loader {
 		return messageDigest;
 	}
 
-	private static Cipher instantiateCipher(String cipherAlgorithm) throws IOException {
+	private static Cipher instantiateCipher(String cipherAlgorithm) {
 		Cipher cipher;
 
 		try {

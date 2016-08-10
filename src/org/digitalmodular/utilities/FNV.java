@@ -32,12 +32,14 @@ package org.digitalmodular.utilities;
  * @author Mark Jeronimus
  */
 // Created 2016-08-01
+@SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
 public enum FNV {
 	;
 
 	public static final int OFFSET_BASIS = 0x811C9DC5;
 	public static final int PRIME        = 0x01000193;
 
+	@SuppressWarnings({"MethodReturnAlwaysConstant", "SameReturnValue"})
 	public static int startFNV() { return OFFSET_BASIS; }
 
 	public static int hashFNV(int hashCode, Object value) {
@@ -67,14 +69,14 @@ public enum FNV {
 	}
 
 	public static int hashFNV(int hashCode, long value) {
-		hashCode = (hashCode ^ (int) ((value >> 56) & 0xFF)) * PRIME;
-		hashCode = (hashCode ^ (int) ((value >> 48) & 0xFF)) * PRIME;
-		hashCode = (hashCode ^ (int) ((value >> 40) & 0xFF)) * PRIME;
-		hashCode = (hashCode ^ (int) ((value >> 32) & 0xFF)) * PRIME;
-		hashCode = (hashCode ^ (int) ((value >> 24) & 0xFF)) * PRIME;
-		hashCode = (hashCode ^ (int) ((value >> 16) & 0xFF)) * PRIME;
-		hashCode = (hashCode ^ (int) ((value >> 8) & 0xFF)) * PRIME;
-		hashCode = (hashCode ^ (int) (value & 0xFF)) * PRIME;
+		hashCode = (hashCode ^ (int)((value >> 56) & 0xFF)) * PRIME;
+		hashCode = (hashCode ^ (int)((value >> 48) & 0xFF)) * PRIME;
+		hashCode = (hashCode ^ (int)((value >> 40) & 0xFF)) * PRIME;
+		hashCode = (hashCode ^ (int)((value >> 32) & 0xFF)) * PRIME;
+		hashCode = (hashCode ^ (int)((value >> 24) & 0xFF)) * PRIME;
+		hashCode = (hashCode ^ (int)((value >> 16) & 0xFF)) * PRIME;
+		hashCode = (hashCode ^ (int)((value >> 8) & 0xFF)) * PRIME;
+		hashCode = (hashCode ^ (int)(value & 0xFF)) * PRIME;
 		return hashCode;
 	}
 

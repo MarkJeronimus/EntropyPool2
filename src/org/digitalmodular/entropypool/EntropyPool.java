@@ -19,10 +19,8 @@
 
 package org.digitalmodular.entropypool;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDate;
-import static org.digitalmodular.utilities.Verifier.requireThat;
+
 import org.digitalmodular.utilities.container.Version;
 
 /**
@@ -40,18 +38,14 @@ public interface EntropyPool {
 	String MAGIC = "ENTROPYPOOL";
 
 	void injectEntropy(byte[] bytes, int entropyBits);
+
 	byte[] extractEntropy(int numBytes);
 
 	long getInjectedEntropy();
+
 	long getExtractedEntropy();
 
 	void mix();
-
-	default void injectEntropyFromFileOrDirectory(File fileOrDirectory) throws IOException {
-		requireThat(fileOrDirectory.exists(), "fileOrDirectory doesn't exist: " + fileOrDirectory);
-
-		EntropyPoolInjector.injectEntropyFromFileOrDirectory(this, fileOrDirectory);
-	}
 
 	default long getAvailableEntropy() {
 		return getInjectedEntropy() - getExtractedEntropy();

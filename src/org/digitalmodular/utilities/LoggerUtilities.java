@@ -19,19 +19,16 @@
 
 package org.digitalmodular.utilities;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.logging.Formatter;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-import java.util.logging.StreamHandler;
+import java.util.logging.*;
 
 /**
  * @author Mark Jeronimus
  */
 // Created 2016-04-23
-@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+@SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "UseOfSystemOutOrSystemErr"})
 public enum LoggerUtilities {
 	;
 
@@ -39,37 +36,40 @@ public enum LoggerUtilities {
 		Logger.getGlobal().setLevel(level);
 		Logger.getGlobal().getParent().removeHandler(Logger.getGlobal().getParent().getHandlers()[0]);
 		Logger.getGlobal().getParent().addHandler(
-				new StreamHandler(System.out, new Formatter() {
-					public synchronized String format(LogRecord record) {
-						StringBuilder sb = new StringBuilder();
-
-						String    level     = record.getLevel().getLocalizedName();
-						String    message   = formatMessage(record);
-						Throwable exception = record.getThrown();
-
-						sb.append('[').append(level).append("] ");
-						sb.append(message);
-						sb.append('\n');
-
-						if (exception != null) {
-							try (StringWriter sw = new StringWriter();
-							     PrintWriter pw = new PrintWriter(sw)) {
-								exception.printStackTrace(pw);
-								sb.append(sw.toString());
-							} catch (Exception ignored) {
-							}
-						}
-
-						return sb.toString();
-					}
-				}) {
+				new StreamHandler(System.out, new OneLineFormatter()) {
 					@Override
-					public void publish(LogRecord record) {
+					public synchronized void publish(LogRecord record) {
 						super.publish(record);
 						flush();
 					}
 				}
 		);
 		Logger.getGlobal().getParent().getHandlers()[0].setLevel(Level.FINEST);
+	}
+
+	private static class OneLineFormatter extends Formatter {
+		@Override
+		public synchronized String format(LogRecord record) {
+			StringBuilder sb = new StringBuilder(64);
+
+			String    levelName = record.getLevel().getLocalizedName();
+			String    message   = formatMessage(record);
+			Throwable exception = record.getThrown();
+
+			sb.append('[').append(levelName).append("] ");
+			sb.append(message);
+			sb.append('\n');
+
+			if (exception != null) {
+				try (StringWriter sw = new StringWriter();
+				     PrintWriter pw = new PrintWriter(sw)) {
+					exception.printStackTrace(pw);
+					sb.append(sw);
+				} catch (IOException ignored) {
+				}
+			}
+
+			return sb.toString();
+		}
 	}
 }

@@ -21,8 +21,10 @@ package org.digitalmodular.entropypool;
 
 import java.security.SecureRandom;
 import java.util.logging.Level;
-import static org.digitalmodular.utilities.ArrayUtilities.shuffle;
+
 import org.digitalmodular.utilities.LogTimer;
+
+import static org.digitalmodular.utilities.ArrayUtilities.shuffle;
 
 /**
  * @author Mark Jeronimus
