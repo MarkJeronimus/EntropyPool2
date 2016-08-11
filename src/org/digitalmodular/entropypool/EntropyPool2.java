@@ -190,44 +190,59 @@ public class EntropyPool2 implements EntropyPool {
 		EntropyPool2Saver.writeTo(this, out);
 	}
 
-	public long getCreateDate()                               { return createDate; }
+	//@formatter:off
 
-	public int getAccessCount()                               { return accessCount.get(); }
+	public long          getCreateDate()                               { return createDate; }
 
-	public long getAccessDate()                               { return accessCount.getCountDate(); }
+	public int           getAccessCount()                              { return accessCount.get(); }
 
-	public void incrementAccessCount()                        { accessCount.count(); }
+	public long          getAccessDate()                               { return accessCount.getCountDate(); }
 
-	public SecureRandom getSecureRandom()                     { return secureRandom.get(); }
+	public void          incrementAccessCount()                        { accessCount.count(); }
 
-	public int getSecureRandomModifyCount()                   { return secureRandom.getModifyCount(); }
+	public SecureRandom  getSecureRandom()                             { return secureRandom.get(); }
 
-	public long getSecureRandomModifyDate()                   { return secureRandom.getModifyDate(); }
+	public int           getSecureRandomModifyCount()                  { return secureRandom.getModifyCount(); }
 
-	public void setSecureRandom(SecureRandom secureRandom)    { this.secureRandom.set(secureRandom); }
+	public long          getSecureRandomModifyDate()                   { return secureRandom.getModifyDate(); }
 
-	public MessageDigest getMessageDigest()                   { return messageDigest.get(); }
+	public void          setSecureRandom(SecureRandom secureRandom)    { this.secureRandom.set(secureRandom); }
 
-	public int getMessageDigestModifyCount()                  { return messageDigest.getModifyCount(); }
+	public MessageDigest getMessageDigest()                            { return messageDigest.get(); }
 
-	public long getMessageDigestModifyDate()                  { return messageDigest.getModifyDate(); }
+	public int           getMessageDigestModifyCount()                 { return messageDigest.getModifyCount(); }
 
-	public void setMessageDigest(MessageDigest messageDigest) { this.messageDigest.set(messageDigest); }
+	public long          getMessageDigestModifyDate()                  { return messageDigest.getModifyDate(); }
 
-	public Cipher getCipher()                                 { return cipher.get(); }
+	public void          setMessageDigest(MessageDigest messageDigest) { this.messageDigest.set(messageDigest); }
 
-	public int getCipherModifyCount()                         { return cipher.getModifyCount(); }
+	public Cipher        getCipher()                                   { return cipher.get(); }
 
-	public long getCipherModifyDate()                         { return cipher.getModifyDate(); }
+	public int           getCipherModifyCount()                        { return cipher.getModifyCount(); }
 
-	public void setCipher(Cipher cipher)                      { this.cipher.set(cipher); }
+	public long          getCipherModifyDate()                         { return cipher.getModifyDate(); }
+
+	public void          setCipher(Cipher cipher)                      { this.cipher.set(cipher); }
 
 	@Override
-	public long getInjectedEntropy() { return injectedEntropy.get(); }
+	public long          getInjectedEntropy()                          { return injectedEntropy.get(); }
 
-	public int getInjectedEntropyModifyCount() { return injectedEntropy.getModifyCount(); }
+	public int           getInjectedEntropyModifyCount()               { return injectedEntropy.getModifyCount(); }
 
-	public long getInjectedEntropyModifyDate() { return injectedEntropy.getModifyDate(); }
+	public long          getInjectedEntropyModifyDate()                { return injectedEntropy.getModifyDate(); }
+
+	@Override
+	public long          getExtractedEntropy()                         { return extractedEntropy.get(); }
+
+	public int           getExtractedEntropyModifyCount()              { return extractedEntropy.getModifyCount(); }
+
+	public long          getExtractedEntropyModifyDate()               { return extractedEntropy.getModifyDate(); }
+
+	public int           getMixCount()                                 { return mixCount.get(); }
+
+	public long          getMixDate()                                  { return mixCount.getCountDate(); }
+
+	//@formatter:on
 
 	public void injectEntropyFromFileOrDirectory(File fileOrDirectory) throws IOException {
 		requireThat(fileOrDirectory.exists(), "fileOrDirectory doesn't exist: " + fileOrDirectory);
@@ -253,13 +268,6 @@ public class EntropyPool2 implements EntropyPool {
 	}
 
 	@Override
-	public long getExtractedEntropy() { return extractedEntropy.get(); }
-
-	public int getExtractedEntropyModifyCount() { return extractedEntropy.getModifyCount(); }
-
-	public long getExtractedEntropyModifyDate() { return extractedEntropy.getModifyDate(); }
-
-	@Override
 	public byte[] extractEntropy(int numBytes) {
 		if (numBytes * 8 > getAvailableEntropy())
 			throw new IllegalStateException(
@@ -278,10 +286,6 @@ public class EntropyPool2 implements EntropyPool {
 
 		return bytes;
 	}
-
-	public int getMixCount() { return mixCount.get(); }
-
-	public long getMixDate() { return mixCount.getCountDate(); }
 
 	@Override
 	public void mix() {
@@ -303,29 +307,31 @@ public class EntropyPool2 implements EntropyPool {
 		return sb.toString();
 	}
 
-	LoggingCount accessCount()                     { return accessCount; }
+	//@formatter:off
 
-	LoggingVariable<SecureRandom> secureRandom()   { return secureRandom; }
+	LoggingCount                   accessCount()      { return accessCount; }
 
-	LoggingVariable<MessageDigest> messageDigest() { return messageDigest; }
+	LoggingVariable<SecureRandom>  secureRandom()     { return secureRandom; }
 
-	LoggingVariable<Cipher> cipher()               { return cipher; }
+	LoggingVariable<MessageDigest> messageDigest()    { return messageDigest; }
 
-	LoggingVariable<Long> injectedEntropy()        { return injectedEntropy; }
+	LoggingVariable<Cipher>        cipher()           { return cipher; }
 
-	LoggingVariable<Long> extractedEntropy()       { return extractedEntropy; }
+	LoggingVariable<Long>          injectedEntropy()  { return injectedEntropy; }
 
-	LoggingCount mixCount()                        { return mixCount; }
+	LoggingVariable<Long>          extractedEntropy() { return extractedEntropy; }
 
-	int hashX()                                    { return hashX; }
+	LoggingCount                   mixCount()         { return mixCount; }
 
-	void hashX(int hashX)                          { this.hashX = hashX; }
+	int                            hashX()            { return hashX; }
 
-	int hashY()                                    { return hashY; }
+	void                           hashX(int hashX)   { this.hashX = hashX; }
 
-	void hashY(int hashY)                          { this.hashY = hashY; }
+	int                            hashY()            { return hashY; }
+
+	void                           hashY(int hashY)   { this.hashY = hashY; }
 
 	@SuppressWarnings("ReturnOfCollectionOrArrayField")
-	byte[] buffer() { return buffer; }
+	byte[]                         buffer()           { return buffer; }
 }
 
