@@ -19,6 +19,8 @@
 
 package org.digitalmodular.utilities.container;
 
+import static java.util.Objects.requireNonNull;
+
 import static org.digitalmodular.utilities.Verifier.requireThat;
 
 /**
@@ -32,6 +34,7 @@ public class LoggingVariable<T> {
 	private long modifyDate;
 
 	public LoggingVariable(T value, int modifyCount, long modifyDate) {
+		requireNonNull(value, "value == null");
 		requireThat(modifyCount >= 0, "modifyCount < 0: " + modifyCount);
 
 		this.value = value;
@@ -44,6 +47,8 @@ public class LoggingVariable<T> {
 	}
 
 	public void set(T value) {
+		requireNonNull(value, "value == null");
+
 		this.value = value;
 
 		log();
