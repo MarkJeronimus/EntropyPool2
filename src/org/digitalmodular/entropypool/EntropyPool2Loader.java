@@ -33,7 +33,6 @@ import org.digitalmodular.utilities.SecureRandomFactory;
 import org.digitalmodular.utilities.container.LoggingCount;
 import org.digitalmodular.utilities.container.LoggingVariable;
 import static org.digitalmodular.utilities.io.DataIO.*;
-
 import static org.digitalmodular.entropypool.EntropyPool2.*;
 
 /**
@@ -53,8 +52,8 @@ enum EntropyPool2Loader {
 		LoggingVariable<MessageDigest> messageDigest = readLoggingMessageDigest(in);
 		LoggingVariable<Cipher>        cipher        = readLoggingCipher(in);
 
-		LoggingVariable<Long> injectedEntropy  = readLoggingVariable(in.readLong(), in);
-		LoggingVariable<Long> extractedEntropy = readLoggingVariable(in.readLong(), in);
+		LoggingVariable<Long> injectedEntropy  = readLoggingVariable(in, in.readLong());
+		LoggingVariable<Long> extractedEntropy = readLoggingVariable(in, in.readLong());
 		LoggingCount          mixCount         = readLoggingCount(in);
 
 		int hashX = in.readInt();
@@ -70,21 +69,21 @@ enum EntropyPool2Loader {
 	private static LoggingVariable<SecureRandom> readLoggingSecureRandom(DataInput in) throws IOException {
 		String                        secureRandomAlgorithm = in.readUTF();
 		SecureRandom                  secureRandomInstance  = instantiateSecureRandom(secureRandomAlgorithm);
-		LoggingVariable<SecureRandom> secureRandom          = readLoggingVariable(secureRandomInstance, in);
+		LoggingVariable<SecureRandom> secureRandom          = readLoggingVariable(in, secureRandomInstance);
 		return secureRandom;
 	}
 
 	private static LoggingVariable<MessageDigest> readLoggingMessageDigest(DataInput in) throws IOException {
 		String                         messageDigestAlgorithm = in.readUTF();
 		MessageDigest                  messageDigestInstance  = instantiateMessageDigest(messageDigestAlgorithm);
-		LoggingVariable<MessageDigest> messageDigest          = readLoggingVariable(messageDigestInstance, in);
+		LoggingVariable<MessageDigest> messageDigest          = readLoggingVariable(in, messageDigestInstance);
 		return messageDigest;
 	}
 
 	private static LoggingVariable<Cipher> readLoggingCipher(DataInput in) throws IOException {
 		String                  cipherAlgorithm = in.readUTF();
 		Cipher                  cipherInstance  = instantiateCipher(cipherAlgorithm);
-		LoggingVariable<Cipher> cipher          = readLoggingVariable(cipherInstance, in);
+		LoggingVariable<Cipher> cipher          = readLoggingVariable(in, cipherInstance);
 		return cipher;
 	}
 

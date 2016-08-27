@@ -102,7 +102,7 @@ public enum DataIO {
 		out.writeLong(value.getModifyDate());
 	}
 
-	public static <T> LoggingVariable<T> readLoggingVariable(T object, DataInput in) throws IOException {
+	public static <T> LoggingVariable<T> readLoggingVariable(DataInput in, T object) throws IOException {
 		int  accessCount = in.readInt();
 		long accessDate  = in.readLong();
 
