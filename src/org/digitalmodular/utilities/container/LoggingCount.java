@@ -30,6 +30,10 @@ public class LoggingCount {
 
 	private long countDate;
 
+	public LoggingCount() {
+		this(0, 0);
+	}
+
 	public LoggingCount(int count, long countDate) {
 		requireThat(count >= 0, "count < 0: " + count);
 
@@ -37,8 +41,9 @@ public class LoggingCount {
 		this.countDate = countDate;
 	}
 
-	public LoggingCount() {
-		this(0, 0);
+	public LoggingCount(LoggingCount other) {
+		count = other.count;
+		countDate = other.countDate;
 	}
 
 	public void count() {

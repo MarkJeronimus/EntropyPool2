@@ -33,6 +33,10 @@ public class LoggingVariable<T> {
 	private int  modifyCount;
 	private long modifyDate;
 
+	public LoggingVariable(T value) {
+		this(value, 0, 0);
+	}
+
 	public LoggingVariable(T value, int modifyCount, long modifyDate) {
 		requireNonNull(value, "value == null");
 		requireThat(modifyCount >= 0, "modifyCount < 0: " + modifyCount);
@@ -42,8 +46,10 @@ public class LoggingVariable<T> {
 		this.modifyDate = modifyDate;
 	}
 
-	public LoggingVariable(T value) {
-		this(value, 0, 0);
+	public LoggingVariable(LoggingVariable<T> other) {
+		value = other.value;
+		modifyCount = other.modifyCount;
+		modifyDate = other.modifyDate;
 	}
 
 	public void set(T value) {

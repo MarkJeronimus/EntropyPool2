@@ -105,28 +105,29 @@ public class EntropyPool2 implements EntropyPool {
 		requireNonNull(secureRandom, "secureRandom == null");
 		requireNonNull(messageDigest, "messageDigest == null");
 		requireNonNull(cipher, "cipher == null");
-		requireThat(injectedEntropy.get() >= 0, "injectedEntropy.value < 0: " + injectedEntropy.get());
-		requireThat(extractedEntropy.get() >= 0, "extractedEntropy.value < 0: " + extractedEntropy.get());
 		requireNonNull(mixCount, "mixCount == null");
-		requireThat(hashX >= 0, "hashX < 0: " + hashX);
+		requireThat(hashX >= 0, "hashX not in range [0,buffer.length):" + hashX);
 		requireThat(hashX < buffer.length, "hashX not in range [0,buffer.length): " + hashX + " >= " + buffer.length);
-		requireThat(hashY >= 0, "hashY < 0: " + hashY);
+		requireThat(hashY >= 0, "hashY not in range [0,buffer.length): " + hashY);
 		requireThat(hashY < buffer.length, "hashY not in range [0,buffer.length): " + hashY + " >= " + buffer.length);
-		requireThat(buffer.length >= messageDigest.get().getDigestLength(),
-		            "buffer.length < messageDigest.digestLength: " +
-		            buffer.length + " < " + messageDigest.get().getDigestLength());
 
 		this.createDate = createDate;
 		this.accessCount = accessCount;
-		this.secureRandom = secureRandom;
-		this.messageDigest = messageDigest;
-		this.cipher = cipher;
-		this.injectedEntropy = injectedEntropy;
-		this.extractedEntropy = extractedEntropy;
-		this.mixCount = mixCount;
+		this.secureRandom = new LoggingVariable<>(secureRandom);
+		this.messageDigest = new LoggingVariable<>(messageDigest);
+		this.cipher = new LoggingVariable<>(cipher);
+		this.injectedEntropy = new LoggingVariable<>(injectedEntropy);
+		this.extractedEntropy = new LoggingVariable<>(extractedEntropy);
+		this.mixCount = new LoggingCount(mixCount);
 		this.hashX = hashX;
 		this.hashY = hashY;
 		this.buffer = buffer;
+
+		requireThat(this.injectedEntropy.get() >= 0, "injectedEntropy.value < 0: " + this.injectedEntropy.get());
+		requireThat(this.extractedEntropy.get() >= 0, "extractedEntropy.value < 0: " + this.extractedEntropy.get());
+		requireThat(this.buffer.length >= this.messageDigest.get().getDigestLength(),
+		            "buffer.length < messageDigest.digestLength: " +
+		            this.buffer.length + " < " + this.messageDigest.get().getDigestLength());
 	}
 
 	public static EntropyPool2 newInstance() throws NoSuchAlgorithmException, NoSuchPaddingException {
