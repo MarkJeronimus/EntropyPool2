@@ -27,7 +27,6 @@ import org.digitalmodular.utilities.LogTimer;
 import org.digitalmodular.utilities.container.Version;
 import org.digitalmodular.utilities.io.InvalidHeaderException;
 import static org.digitalmodular.utilities.Verifier.requireThat;
-
 import static org.digitalmodular.entropypool.EntropyPool.MAGIC;
 
 /**

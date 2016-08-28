@@ -27,7 +27,7 @@ import java.security.SecureRandom;
 import javax.crypto.Cipher;
 
 import org.digitalmodular.utilities.container.LoggingCount;
-import org.digitalmodular.utilities.container.LoggingVariable;
+import org.digitalmodular.utilities.container.LoggingReference;
 
 /**
  * @author Mark Jeronimus
@@ -96,17 +96,17 @@ public enum DataIO {
 		return loggingCount;
 	}
 
-	public static void writeLoggingVariable(DataOutput out, LoggingVariable<?> value) throws IOException {
+	public static void writeLoggingReference(DataOutput out, LoggingReference<?> value) throws IOException {
 		writeObject(out, value.get());
 		out.writeInt(value.getModifyCount());
 		out.writeLong(value.getModifyDate());
 	}
 
-	public static <T> LoggingVariable<T> readLoggingVariable(DataInput in, T object) throws IOException {
+	public static <T> LoggingReference<T> readLoggingReference(DataInput in, T object) throws IOException {
 		int  accessCount = in.readInt();
 		long accessDate  = in.readLong();
 
-		LoggingVariable<T> value = new LoggingVariable<>(object, accessCount, accessDate);
+		LoggingReference<T> value = new LoggingReference<>(object, accessCount, accessDate);
 		return value;
 	}
 }

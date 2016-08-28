@@ -34,7 +34,7 @@ import javax.crypto.NoSuchPaddingException;
 import org.digitalmodular.utilities.LogTimer;
 import org.digitalmodular.utilities.SecureRandomFactory;
 import org.digitalmodular.utilities.container.LoggingCount;
-import org.digitalmodular.utilities.container.LoggingVariable;
+import org.digitalmodular.utilities.container.LoggingReference;
 import org.digitalmodular.utilities.container.Version;
 import org.digitalmodular.utilities.io.InvalidHeaderException;
 import static org.digitalmodular.utilities.Verifier.requireThat;
@@ -56,13 +56,13 @@ public class EntropyPool2 implements EntropyPool {
 	private final long         createDate;
 	private final LoggingCount accessCount;
 
-	private final LoggingVariable<SecureRandom>  secureRandom;
-	private final LoggingVariable<MessageDigest> messageDigest;
-	private final LoggingVariable<Cipher>        cipher;
+	private final LoggingReference<SecureRandom>  secureRandom;
+	private final LoggingReference<MessageDigest> messageDigest;
+	private final LoggingReference<Cipher>        cipher;
 
-	private final LoggingVariable<Long> injectedEntropy;
-	private final LoggingVariable<Long> extractedEntropy;
-	private final LoggingCount          mixCount;
+	private final LoggingReference<Long> injectedEntropy;
+	private final LoggingReference<Long> extractedEntropy;
+	private final LoggingCount           mixCount;
 
 	private int hashX;
 	private int hashY;
@@ -82,12 +82,12 @@ public class EntropyPool2 implements EntropyPool {
 		createDate = System.currentTimeMillis();
 		accessCount = new LoggingCount();
 
-		secureRandom = new LoggingVariable<>(SecureRandomFactory.getInstance(DEFAULT_SECURERANDOM_STRING));
-		messageDigest = new LoggingVariable<>(MessageDigest.getInstance(DEFAULT_MESSAGEDIGEST_STRING));
-		cipher = new LoggingVariable<>(Cipher.getInstance(DEFAULT_CIPHER_STRING));
+		secureRandom = new LoggingReference<>(SecureRandomFactory.getInstance(DEFAULT_SECURERANDOM_STRING));
+		messageDigest = new LoggingReference<>(MessageDigest.getInstance(DEFAULT_MESSAGEDIGEST_STRING));
+		cipher = new LoggingReference<>(Cipher.getInstance(DEFAULT_CIPHER_STRING));
 
-		injectedEntropy = new LoggingVariable<>(0L);
-		extractedEntropy = new LoggingVariable<>(0L);
+		injectedEntropy = new LoggingReference<>(0L);
+		extractedEntropy = new LoggingReference<>(0L);
 		mixCount = new LoggingCount();
 
 		hashX = 0;
@@ -97,9 +97,9 @@ public class EntropyPool2 implements EntropyPool {
 	}
 
 	@SuppressWarnings("AssignmentToCollectionOrArrayFieldFromParameter")
-	EntropyPool2(long createDate, LoggingCount accessCount, LoggingVariable<SecureRandom> secureRandom,
-	             LoggingVariable<MessageDigest> messageDigest, LoggingVariable<Cipher> cipher,
-	             LoggingVariable<Long> injectedEntropy, LoggingVariable<Long> extractedEntropy,
+	EntropyPool2(long createDate, LoggingCount accessCount, LoggingReference<SecureRandom> secureRandom,
+	             LoggingReference<MessageDigest> messageDigest, LoggingReference<Cipher> cipher,
+	             LoggingReference<Long> injectedEntropy, LoggingReference<Long> extractedEntropy,
 	             LoggingCount mixCount, int hashX, int hashY, byte[] buffer) {
 		requireNonNull(accessCount, "accessCount == null");
 		requireNonNull(secureRandom, "secureRandom == null");
@@ -113,11 +113,11 @@ public class EntropyPool2 implements EntropyPool {
 
 		this.createDate = createDate;
 		this.accessCount = accessCount;
-		this.secureRandom = new LoggingVariable<>(secureRandom);
-		this.messageDigest = new LoggingVariable<>(messageDigest);
-		this.cipher = new LoggingVariable<>(cipher);
-		this.injectedEntropy = new LoggingVariable<>(injectedEntropy);
-		this.extractedEntropy = new LoggingVariable<>(extractedEntropy);
+		this.secureRandom = new LoggingReference<>(secureRandom);
+		this.messageDigest = new LoggingReference<>(messageDigest);
+		this.cipher = new LoggingReference<>(cipher);
+		this.injectedEntropy = new LoggingReference<>(injectedEntropy);
+		this.extractedEntropy = new LoggingReference<>(extractedEntropy);
 		this.mixCount = new LoggingCount(mixCount);
 		this.hashX = hashX;
 		this.hashY = hashY;
@@ -126,8 +126,8 @@ public class EntropyPool2 implements EntropyPool {
 		requireThat(this.injectedEntropy.get() >= 0, "injectedEntropy.value < 0: " + this.injectedEntropy.get());
 		requireThat(this.extractedEntropy.get() >= 0, "extractedEntropy.value < 0: " + this.extractedEntropy.get());
 		requireThat(this.buffer.length >= this.messageDigest.get().getDigestLength(),
-		            "buffer.length < messageDigest.digestLength: " +
-		            this.buffer.length + " < " + this.messageDigest.get().getDigestLength());
+		            "buffer.length < messageDigest.digestLength: " + this.buffer.length + " < " +
+		            this.messageDigest.get().getDigestLength());
 	}
 
 	public static EntropyPool2 newInstance() throws NoSuchAlgorithmException, NoSuchPaddingException {
@@ -199,7 +199,7 @@ public class EntropyPool2 implements EntropyPool {
 
 	public long          getAccessDate()                               { return accessCount.getCountDate(); }
 
-	public void          incrementAccessCount()                        { accessCount.count(); }
+	public void          incrementAccessCount()                        { accessCount.countUp(); }
 
 	public SecureRandom  getSecureRandom()                             { return secureRandom.get(); }
 
@@ -265,7 +265,7 @@ public class EntropyPool2 implements EntropyPool {
 			}
 		}
 
-		injectedEntropy.set(Math.min(injectedEntropy.get() + entropyBits, buffer.length * 8L));
+		injectedEntropy.update(value -> Math.min(value + entropyBits, buffer.length * 8L));
 	}
 
 	@Override
@@ -283,7 +283,7 @@ public class EntropyPool2 implements EntropyPool {
 
 		mix();
 
-		extractedEntropy.set(Math.addExact(extractedEntropy.get(), numBytes * 8L));
+		extractedEntropy.update(value -> Math.addExact(value, numBytes * 8L));
 
 		return bytes;
 	}
@@ -294,7 +294,7 @@ public class EntropyPool2 implements EntropyPool {
 
 		mixer.mix(this);
 
-		mixCount.count();
+		mixCount.countUp();
 		writePointer = 0;
 
 		LogTimer.finishAndLog(Level.FINE, "Mixed the Entropy Pool in {0} seconds");
@@ -312,15 +312,15 @@ public class EntropyPool2 implements EntropyPool {
 
 	LoggingCount                   accessCount()      { return accessCount; }
 
-	LoggingVariable<SecureRandom>  secureRandom()     { return secureRandom; }
+	LoggingReference<SecureRandom>  secureRandom()     { return secureRandom; }
 
-	LoggingVariable<MessageDigest> messageDigest()    { return messageDigest; }
+	LoggingReference<MessageDigest> messageDigest()    { return messageDigest; }
 
-	LoggingVariable<Cipher>        cipher()           { return cipher; }
+	LoggingReference<Cipher>        cipher()           { return cipher; }
 
-	LoggingVariable<Long>          injectedEntropy()  { return injectedEntropy; }
+	LoggingReference<Long>          injectedEntropy()  { return injectedEntropy; }
 
-	LoggingVariable<Long>          extractedEntropy() { return extractedEntropy; }
+	LoggingReference<Long>          extractedEntropy() { return extractedEntropy; }
 
 	LoggingCount                   mixCount()         { return mixCount; }
 

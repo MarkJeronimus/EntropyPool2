@@ -31,7 +31,7 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.digitalmodular.utilities.SecureRandomFactory;
 import org.digitalmodular.utilities.container.LoggingCount;
-import org.digitalmodular.utilities.container.LoggingVariable;
+import org.digitalmodular.utilities.container.LoggingReference;
 import static org.digitalmodular.utilities.io.DataIO.*;
 import static org.digitalmodular.entropypool.EntropyPool2.*;
 
@@ -48,13 +48,13 @@ enum EntropyPool2Loader {
 		long         createDate  = in.readLong();
 		LoggingCount accessCount = readLoggingCount(in);
 
-		LoggingVariable<SecureRandom>  secureRandom  = readLoggingSecureRandom(in);
-		LoggingVariable<MessageDigest> messageDigest = readLoggingMessageDigest(in);
-		LoggingVariable<Cipher>        cipher        = readLoggingCipher(in);
+		LoggingReference<SecureRandom>  secureRandom  = readLoggingSecureRandom(in);
+		LoggingReference<MessageDigest> messageDigest = readLoggingMessageDigest(in);
+		LoggingReference<Cipher>        cipher        = readLoggingCipher(in);
 
-		LoggingVariable<Long> injectedEntropy  = readLoggingVariable(in, in.readLong());
-		LoggingVariable<Long> extractedEntropy = readLoggingVariable(in, in.readLong());
-		LoggingCount          mixCount         = readLoggingCount(in);
+		LoggingReference<Long> injectedEntropy  = readLoggingReference(in, in.readLong());
+		LoggingReference<Long> extractedEntropy = readLoggingReference(in, in.readLong());
+		LoggingCount           mixCount         = readLoggingCount(in);
 
 		int hashX = in.readInt();
 		int hashY = in.readInt();
@@ -66,24 +66,24 @@ enum EntropyPool2Loader {
 		return pool;
 	}
 
-	private static LoggingVariable<SecureRandom> readLoggingSecureRandom(DataInput in) throws IOException {
-		String                        secureRandomAlgorithm = in.readUTF();
-		SecureRandom                  secureRandomInstance  = instantiateSecureRandom(secureRandomAlgorithm);
-		LoggingVariable<SecureRandom> secureRandom          = readLoggingVariable(in, secureRandomInstance);
+	private static LoggingReference<SecureRandom> readLoggingSecureRandom(DataInput in) throws IOException {
+		String                         secureRandomAlgorithm = in.readUTF();
+		SecureRandom                   secureRandomInstance  = instantiateSecureRandom(secureRandomAlgorithm);
+		LoggingReference<SecureRandom> secureRandom          = readLoggingReference(in, secureRandomInstance);
 		return secureRandom;
 	}
 
-	private static LoggingVariable<MessageDigest> readLoggingMessageDigest(DataInput in) throws IOException {
-		String                         messageDigestAlgorithm = in.readUTF();
-		MessageDigest                  messageDigestInstance  = instantiateMessageDigest(messageDigestAlgorithm);
-		LoggingVariable<MessageDigest> messageDigest          = readLoggingVariable(in, messageDigestInstance);
+	private static LoggingReference<MessageDigest> readLoggingMessageDigest(DataInput in) throws IOException {
+		String                          messageDigestAlgorithm = in.readUTF();
+		MessageDigest                   messageDigestInstance  = instantiateMessageDigest(messageDigestAlgorithm);
+		LoggingReference<MessageDigest> messageDigest          = readLoggingReference(in, messageDigestInstance);
 		return messageDigest;
 	}
 
-	private static LoggingVariable<Cipher> readLoggingCipher(DataInput in) throws IOException {
-		String                  cipherAlgorithm = in.readUTF();
-		Cipher                  cipherInstance  = instantiateCipher(cipherAlgorithm);
-		LoggingVariable<Cipher> cipher          = readLoggingVariable(in, cipherInstance);
+	private static LoggingReference<Cipher> readLoggingCipher(DataInput in) throws IOException {
+		String                   cipherAlgorithm = in.readUTF();
+		Cipher                   cipherInstance  = instantiateCipher(cipherAlgorithm);
+		LoggingReference<Cipher> cipher          = readLoggingReference(in, cipherInstance);
 		return cipher;
 	}
 

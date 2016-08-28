@@ -46,13 +46,18 @@ public class LoggingCount {
 		countDate = other.countDate;
 	}
 
-	public void count() {
+	public int get() { return count; }
+
+	public void countUp() {
 		count++;
 
 		log();
 	}
 
-	public int get()           { return count; }
+	public int countUpAndGet() {
+		countUp();
+		return count;
+	}
 
 	public long getCountDate() { return countDate; }
 

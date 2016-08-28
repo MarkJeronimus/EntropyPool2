@@ -121,7 +121,7 @@ public enum MessageDigestUtilities {
 		hashLong(digest, value.getCountDate());
 	}
 
-	public static void hashLoggingVariable(MessageDigest digest, LoggingVariable<?> value) {
+	public static void hashLoggingReference(MessageDigest digest, LoggingReference<?> value) {
 		hashObject(digest, value.get());
 		hashInt(digest, value.getModifyCount());
 		hashLong(digest, value.getModifyDate());

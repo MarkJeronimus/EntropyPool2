@@ -23,7 +23,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import static org.digitalmodular.utilities.io.DataIO.*;
-
 import static org.digitalmodular.entropypool.EntropyPool.*;
 
 /**
@@ -51,12 +50,12 @@ enum EntropyPool2Saver {
 		out.writeLong(pool.getCreateDate());
 		writeLoggingCount(out, pool.accessCount());
 
-		writeLoggingVariable(out, pool.secureRandom());
-		writeLoggingVariable(out, pool.messageDigest());
-		writeLoggingVariable(out, pool.cipher());
+		writeLoggingReference(out, pool.secureRandom());
+		writeLoggingReference(out, pool.messageDigest());
+		writeLoggingReference(out, pool.cipher());
 
-		writeLoggingVariable(out, pool.injectedEntropy());
-		writeLoggingVariable(out, pool.extractedEntropy());
+		writeLoggingReference(out, pool.injectedEntropy());
+		writeLoggingReference(out, pool.extractedEntropy());
 		writeLoggingCount(out, pool.mixCount());
 
 		out.writeInt(pool.hashX());

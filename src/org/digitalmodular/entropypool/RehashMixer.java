@@ -62,11 +62,11 @@ public class RehashMixer implements EntropyPoolMixer {
 
 			hashLong(digest, pool.getCreateDate());
 			hashLoggingCount(digest, pool.accessCount());
-			hashLoggingVariable(digest, pool.secureRandom());
-			hashLoggingVariable(digest, pool.messageDigest());
-			hashLoggingVariable(digest, pool.cipher());
-			hashLoggingVariable(digest, pool.injectedEntropy());
-			hashLoggingVariable(digest, pool.extractedEntropy());
+			hashLoggingReference(digest, pool.secureRandom());
+			hashLoggingReference(digest, pool.messageDigest());
+			hashLoggingReference(digest, pool.cipher());
+			hashLoggingReference(digest, pool.injectedEntropy());
+			hashLoggingReference(digest, pool.extractedEntropy());
 			hashLoggingCount(digest, pool.mixCount());
 			hashInt(digest, hashX);
 			hashInt(digest, hashY);
